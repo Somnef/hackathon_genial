@@ -1,29 +1,37 @@
-const express = require('express');
+const express = require("express");
+const offerController = require("./controllers/offerController");
+const bidController = require("./controllers/bidController");
+const blockchainController = require("./controllers/blockchainController");
+const userController = require("./controllers/userController");
+const authController = require("./controllers/authController");
+const errorHandler = require("../middleware/errorHandler"); // Your custom error handler
+
 const router = express.Router();
 
 // User routes
-const userController = require('./controllers/userController');
-router.get('/api/user/list', userController.list);
-router.post('/api/user/tradehistory', userController.tradehistory);
+router.get("/api/user/list", userController.list);
+router.post("/api/user/trade-history", userController.tradehistory);
 
 // User auth routes
-const authController = require('./controllers/authController');
-router.post('/api/user/auth/sign-up', authController.signUp);
-router.post('/api/user/auth/login', authController.login);
+router.post("/api/user/auth/sign-up", authController.signUp);
+router.post("/api/user/auth/login", authController.login);
 
 // Auction routes
-const auctionController = require('./controllers/auctionController');
-router.post('/api/offer/create', offerController.create);
-router.get('/api/offer/list', offerController.list);
+router.post("/api/offer/create", offerController.create);
+router.get("/api/offer/list", offerController.list);
 
 // Auction bid routes
-const bidController = require('./controllers/bidController');
-router.post('/api/auction/bid/create', bidController.create);
-router.get('/api/auction/bid/list', bidController.list);
+router.post("/api/auction/bid/create", bidController.create);
+router.get("/api/auction/bid/list", bidController.list);
 
 // Blockchain routes
-const blockchainController = require('./controllers/blockchainController');
-router.post('/api/blockchain/transaction', blockchainController.transaction);
-router.get('/api/blockchain/transaction/:transactionHash', blockchainController.getTransactionByHash);
+router.post("/api/blockchain/transaction", blockchainController.transaction);
+router.get(
+  "/api/blockchain/transaction/:transactionHash",
+  blockchainController.getTransactionByHash
+);
+
+// Global error handler middleware (after routes are defined)
+router.use(errorHandler);
 
 module.exports = router;
