@@ -1,13 +1,13 @@
 const { Web3 } = require("web3");
 
 // Initialize Web3
-const web3 = new Web3("http://localhost:8545"); // Replace with your blockchain node URL
+const web3 = new Web3("http://192.168.137.200:7545"); // Replace with your blockchain node URL
 
 // ABI and Contract Address
 const contractABI = [
   // Replace with your contract's ABI
 ];
-const contractAddress = "0x..."; // Replace with your contract's address
+const contractAddress = "0x2d78dfB74d31B65c8E93F3a0CFa3e6D30b627066"; // Replace with your contract's address
 
 // Utility function to get the contract instance
 const getContractInstance = () => {
