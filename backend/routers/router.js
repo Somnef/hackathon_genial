@@ -15,6 +15,7 @@ router.post("/api/user/trade-history", userController.tradehistory);
 // User auth routes
 router.post("/api/user/auth/sign-up", authController.signUp);
 router.post("/api/user/auth/login", authController.login);
+router.get("/api/auth/me", userController.getMe);
 
 // Auction routes
 router.post("/api/offer/create", offerController.create);
