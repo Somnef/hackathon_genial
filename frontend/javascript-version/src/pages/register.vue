@@ -1,8 +1,8 @@
 <script setup>
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
-import logo from '@images/logo.svg?raw'
-import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?url'
-import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?url'
+import AuthProvider from '@/views/pages/authentication/AuthProvider.vue';
+import logo from '@images/logo.svg?raw';
+import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?url';
+import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?url';
 
 const form = ref({
   username: '',
@@ -46,7 +46,7 @@ const isPasswordVisible = ref(false)
               v-html="logo"
             />
             <h1 class="app-logo-title">
-              sneat
+              e-skimos
             </h1>
           </RouterLink>
         </VCardItem>

@@ -23,20 +23,8 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   
   </VerticalNavGroup>
 
-  <!-- 👉 Apps & Pages -->
-  <VerticalNavSectionTitle
-    :item="{
-      heading: 'Apps & Pages',
-    }"
-  />
 
-  <VerticalNavLink
-    :item="{
-      title: 'Account Settings',
-      icon: 'bx-user',
-      to: '/account-settings',
-    }"
-  />
+
 
 
   <!-- 👉 User Interface -->
@@ -47,7 +35,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   />
   <VerticalNavLink
     :item="{
-      title: 'Cards',
+      title: 'Listings',
       icon: 'bx-credit-card',
       to: '/cards',
     }"
@@ -61,14 +49,14 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   />
   <VerticalNavLink
     :item="{
-      title: 'Form Layouts',
+      title: 'Sell',
       icon: 'bx-layout',
       to: '/form-layouts',
     }"
   />
   <VerticalNavLink
     :item="{
-      title: 'Tables',
+      title: 'History',
       icon: 'bx-table',
       to: '/tables',
     }"

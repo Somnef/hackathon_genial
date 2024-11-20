@@ -20,7 +20,7 @@
     >
       <VCard>
         <VImg src="https://cdn.themeselection.com/ts-assets/sneat/sneat-vuetify-vuejs-admin-template-free/banner/banner.png" />
-        <VCardTitle>Sneat - Vuetify Admin Template</VCardTitle>
+        <VCardTitle>e-skimos</VCardTitle>
         <VCardText>
           Sneat Admin is the most developer friendly & highly customisable Admin Dashboard Template based on Vuetify.
         </VCardText>
