@@ -23,12 +23,12 @@ router.get("/api/auth/me", userController.getMe);
 // Offer routes
 
 // contract.methods.offerEnergy
-router.post("/api/offer/create", offerController.create);
-router.get("/api/offer/list", offerController.list);
+router.post("/api/offer/create", offerController.createOffer);
+router.get("/api/offer/list", offerController.listOffer);
 
 // Auction bid routes
-router.post("/api/auction/bid/create", bidController.create);
-router.get("/api/auction/bid/list", bidController.list);
+router.post("/api/auction/bid/create", bidController.createBid);
+router.get("/api/auction/bid/list/:offerId", bidController.listBids);
 
 // Blockchain routes
 router.post("/api/blockchain/transaction", blockchainController.transaction);
