@@ -13,10 +13,12 @@ const createOffer = async (req, res, next) => {
 
     const contract = getContractInstance();
     const accounts = await web3.eth.getAccounts();
+    console.log(accounts);
     const seller = accounts[0];
 
-    const receipt = await contract.methods
-      .createOffer(amount, pricePerUnit, expiry)
+
+    const receipt = await contract.functions
+      .offerEnergy(+amount, +pricePerUnit, +expiry)
       .send({ from: seller });
 
     res.status(201).json({

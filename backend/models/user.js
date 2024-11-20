@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  privateKey: {
+    type: String,
+  },
 });
 
 // Middleware to update `updatedAt` field before saving
