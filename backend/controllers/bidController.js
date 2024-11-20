@@ -19,7 +19,7 @@ const createBid = async (req, res, next) => {
     const bidder = accounts[0]; // Assuming the first account is the bidder
 
     // Check if the offer exists (you can add this if your contract supports offer validation)
-    const offer = await contract.methods.getOffer(offerId).call();
+    const offer = await contract.methods.getOffer(+offerId).call();
     if (!offer) {
       throw new GlobalError("Offer not found", 404);
     }
