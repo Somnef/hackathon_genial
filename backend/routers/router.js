@@ -9,33 +9,32 @@ const errorHandler = require("../middleware/errorHandler"); // Your custom error
 const router = express.Router();
 
 // User routes
-router.get("/api/user/list", userController.list);
-router.post("/api/user/trade-history", userController.tradehistory);
+// router.get("/api/user/list", userController.list);
+// router.post("/api/user/trade-history", userController.tradehistory);
 
 // User auth routes
 
 // create user -> create wallet -> register wallet with contract
 router.post("/api/user/auth/sign-up", authController.signUp);
-
 router.post("/api/user/auth/login", authController.login);
-router.get("/api/auth/me", userController.getMe);
+router.get("/api/auth/me", authController.getMe);
 
 // Offer routes
 
 // contract.methods.offerEnergy
 router.post("/api/offer/create", offerController.createOffer);
-router.get("/api/offer/list", offerController.listOffer);
+// router.get("/api/offer/list", offerController.listOffer);
 
 // Auction bid routes
 router.post("/api/auction/bid/create", bidController.createBid);
 router.get("/api/auction/bid/list/:offerId", bidController.listBids);
 
 // Blockchain routes
-router.post("/api/blockchain/transaction", blockchainController.transaction);
-router.get(
-  "/api/blockchain/transaction/:transactionHash",
-  blockchainController.getTransactionByHash
-);
+// router.post("/api/blockchain/transaction", blockchainController.transaction);
+// router.get(
+//   "/api/blockchain/transaction/:transactionHash",
+//   blockchainController.getTransactionByHash
+// );
 
 // Global error handler middleware (after routes are defined)
 router.use(errorHandler);

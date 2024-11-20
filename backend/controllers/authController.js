@@ -5,7 +5,7 @@ const User = require("../models/User"); // Your User model
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 
 // Sign-Up Controller
-exports.signUp = async (req, res) => {
+const signUp = async (req, res) => {
   try {
     const { name, email, password, walletId } = req.body;
 
@@ -36,13 +36,12 @@ exports.signUp = async (req, res) => {
 
     return res.status(201).json({ message: "User registered successfully." });
   } catch (error) {
-    console.error("Sign-Up Error:", error);
-    return res.status(500).json({ message: "Internal server error." });
+    next(error);
   }
 };
 
 // Login Controller
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -59,19 +58,22 @@ exports.login = async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ id: user._id, walletId: user.walletId }, JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, walletId: user.walletId },
+      JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     return res.status(200).json({ token, message: "Login successful." });
   } catch (error) {
-    console.error("Login Error:", error);
-    return res.status(500).json({ message: "Internal server error." });
+    next(error);
   }
 };
 
 // Get Me Controller
-exports.getMe = async (req, res) => {
+const getMe = async (req, res) => {
   try {
     const userId = req.user._id; // Extracted from JWT middleware
     const user = await User.findById(userId).select("-password"); // Exclude password
@@ -81,7 +83,8 @@ exports.getMe = async (req, res) => {
 
     return res.status(200).json(user);
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
+
+module.exports = { login, signUp, getMe };
