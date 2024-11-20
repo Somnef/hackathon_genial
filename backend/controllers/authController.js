@@ -1,19 +1,28 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User"); // Your User model
+const {
+  contractAddress,
+  web3,
+  getContractInstance,
+} = require("../utils/contractUtil"); // Import your utility function
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 
 // Sign-Up Controller
-const signUp = async (req, res) => {
+const signUp = async (req, res, next) => {
   try {
-    const { name, email, password, walletId } = req.body;
+    const { name, email, password } = req.body;
 
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email is already in use." });
     }
+
+    // Create a new wallet for the user
+    const newAccount = web3.eth.accounts.create(); // Generates a new wallet (privateKey and address)
+    const { privateKey, address: walletId } = newAccount;
 
     // Check if the wallet ID is already in use
     const existingWallet = await User.findOne({ walletId });
@@ -30,11 +39,47 @@ const signUp = async (req, res) => {
       email,
       password: hashedPassword,
       walletId,
+      privateKey, // Store private key securely
     });
 
+    // Save user to the database
     await user.save();
 
-    return res.status(201).json({ message: "User registered successfully." });
+    // Get the contract instance from the utility
+    const contract = getContractInstance();
+
+    // Register the user on the blockchain
+    const nonce = await web3.eth.getTransactionCount(walletId);
+    const gasPrice = await web3.eth.getGasPrice();
+    const chainId = await web3.eth.getChainId();
+
+    // Call registerUser() on the smart contract
+    const callFun = contract.methods.registerUser(walletId); // Pass walletId to the smart contract
+    const tx = {
+      from: walletId,
+      to: contractAddress,
+      gas: await callFun.estimateGas({ from: walletId }),
+      gasPrice: gasPrice,
+      data: callFun.encodeABI(),
+      nonce: nonce,
+      chainId: chainId,
+    };
+
+    // // Sign the transaction
+    // const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+    // const txCallFunHash = await web3.eth.sendSignedTransaction(
+    //   signedTx.rawTransaction
+    // );
+    // const txCallFunReceipt = await web3.eth.getTransactionReceipt(
+    //   txCallFunHash.transactionHash
+    // );
+
+    // console.log(txCallFunReceipt);
+
+    return res.status(201).json({
+      message: "User registered successfully.",
+      walletId: walletId, // Return wallet ID to the frontend (if needed)
+    });
   } catch (error) {
     next(error);
   }
