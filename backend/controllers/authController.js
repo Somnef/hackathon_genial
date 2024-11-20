@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 // Sign-Up Controller
 exports.signUp = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { name, email, password, walletId } = req.body;
 
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
@@ -15,15 +15,21 @@ exports.signUp = async (req, res) => {
       return res.status(400).json({ message: "Email is already in use." });
     }
 
+    // Check if the wallet ID is already in use
+    const existingWallet = await User.findOne({ walletId });
+    if (existingWallet) {
+      return res.status(400).json({ message: "Wallet ID is already in use." });
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create a new user
     const user = new User({
-      username,
+      name,
       email,
       password: hashedPassword,
-      role,
+      walletId,
     });
 
     await user.save();
@@ -53,7 +59,7 @@ exports.login = async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, walletId: user.walletId }, JWT_SECRET, {
       expiresIn: "1h",
     });
 
@@ -64,6 +70,7 @@ exports.login = async (req, res) => {
   }
 };
 
+// Get Me Controller
 exports.getMe = async (req, res) => {
   try {
     const userId = req.user._id; // Extracted from JWT middleware
