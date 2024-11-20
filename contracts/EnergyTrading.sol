@@ -42,6 +42,11 @@ contract EnergyTrading {
         _;
     }
 
+    constructor() {
+        // Register the contract creator as a user
+        users[msg.sender] = true;
+    }
+
     // Register a user with their wallet address
     function registerUser() external {
         require(!users[msg.sender], "User already registered.");
