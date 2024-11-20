@@ -71,14 +71,14 @@ contract EnergyTrading {
     }
 
     // Place a bid on an energy offer
-    function placeBid(uint256 offerId) external payable onlyRegisteredUser {
+    function placeBid(uint256 offerId, uint256 _bidAmount) external onlyRegisteredUser payable {
         EnergyOffer storage offer = energyOffers[offerId];
 
         // Automatically check if the auction has ended
         _endAuctionIfExpired(offerId);
 
         require(block.timestamp < offer.auctionEndTime, "Auction has ended.");
-        require(msg.value > offer.highestBid, "Bid must be higher than the current highest bid.");
+        require(_bidAmount > offer.highestBid, "Bid must be higher than the current highest bid.");
 
         // Refund previous highest bidder
         if (offer.highestBidder != address(0)) {
@@ -88,7 +88,7 @@ contract EnergyTrading {
         // Store the new bid
         bids.push(Bid({
             bidder: msg.sender,
-            amount: msg.value,
+            amount: _bidAmount,
             offerId: offerId
         }));
 
