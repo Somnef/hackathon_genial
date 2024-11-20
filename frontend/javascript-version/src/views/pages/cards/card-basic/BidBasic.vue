@@ -37,7 +37,7 @@ const isCardDetailsVisible = ref(false)
 
           <div>
             <VCardItem>
-              <VCardTitle>Energy Units 15000 Kilo Watts</VCardTitle>
+              <VCardTitle>Energy Available 2000 Units</VCardTitle>
             </VCardItem>
 
             <VCardText>

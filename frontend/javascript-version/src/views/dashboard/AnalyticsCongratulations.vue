@@ -1,7 +1,7 @@
 <script setup>
-import { useTheme } from 'vuetify'
-import illustrationJohnDark from '@images/cards/illustration-john-dark.png'
-import illustrationJohnLight from '@images/cards/illustration-john-light.png'
+import illustrationJohnDark from '@images/cards/illustration-john-dark.png';
+import illustrationJohnLight from '@images/cards/illustration-john-light.png';
+import { useTheme } from 'vuetify';
 
 const { global } = useTheme()
 const illustrationJohn = computed(() => global.name.value === 'dark' ? illustrationJohnDark : illustrationJohnLight)
@@ -18,21 +18,20 @@ const illustrationJohn = computed(() => global.name.value === 'dark' ? illustrat
       >
         <VCardItem class="pb-3">
           <VCardTitle class="text-primary">
-            Congratulations John! 🎉
+            Life towards sustainability
           </VCardTitle>
         </VCardItem>
 
         <VCardText>
-          You have done 72% more sales today.
+          You have saved the planet, 20% increase from last sales.
           <br>
-          Check your new raising badge in your profile.
           <br>
           <VBtn
             variant="tonal"
             class="mt-6"
             size="small"
           >
-            View Badges
+            Go to Listings
           </VBtn>
         </VCardText>
       </VCol>

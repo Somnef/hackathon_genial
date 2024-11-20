@@ -1,14 +1,14 @@
 <script setup>
-import CardBasic from '@/views/pages/cards/card-basic/CardBasic.vue';
+import BidBasic from '@/views/pages/cards/card-basic/BidBasic.vue';
 </script>
 
 <template>
   <div>
     <p class="text-2xl mb-6">
-      Listings
+      Bids Available
     </p>
 
-    <CardBasic />
+    <BidBasic />
 
   </div>
 </template>
