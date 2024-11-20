@@ -18,6 +18,7 @@ router.post("/api/user/trade-history", userController.tradehistory);
 router.post("/api/user/auth/sign-up", authController.signUp);
 
 router.post("/api/user/auth/login", authController.login);
+router.get("/api/auth/me", userController.getMe);
 
 // Offer routes
 
