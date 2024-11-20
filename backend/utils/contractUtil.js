@@ -1,4 +1,4 @@
-const Web3 = require("web3");
+const { Web3 } = require("web3");
 
 // Initialize Web3
 const web3 = new Web3("http://localhost:8545"); // Replace with your blockchain node URL
