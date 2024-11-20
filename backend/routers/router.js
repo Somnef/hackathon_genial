@@ -1,8 +1,7 @@
 const express = require("express");
 const offerController = require("../controllers/offerController");
 const bidController = require("../controllers/bidController");
-const blockchainController = require("../controllers/blockchainController");
-const userController = require("../controllers/userController");
+// const blockchainController = require("../controllers/blockchainController");
 const authController = require("../controllers/authController");
 const errorHandler = require("../middleware/errorHandler"); // Your custom error handler
 
@@ -14,7 +13,6 @@ const router = express.Router();
 
 // User auth routes
 
-// create user -> create wallet -> register wallet with contract
 router.post("/api/user/auth/sign-up", authController.signUp);
 router.post("/api/user/auth/login", authController.login);
 router.get("/api/auth/me", authController.getMe);
