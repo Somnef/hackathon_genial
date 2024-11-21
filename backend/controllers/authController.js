@@ -120,7 +120,7 @@ const login = async (req, res) => {
 // Get Me Controller
 const getMe = async (req, res) => {
   try {
-    const userId = req.user._id; // Extracted from JWT middleware
+    const userId = req.user.id; // Extracted from JWT middleware
     const user = await User.findById(userId).select("-password"); // Exclude password
     if (!user) {
       return res.status(404).json({ message: "User not found" });
