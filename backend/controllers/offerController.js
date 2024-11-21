@@ -145,4 +145,37 @@ const endOffer = async (req, res, next) => {
   }
 };
 
-module.exports = { createOffer, listOffer, endOffer };
+const getOffersByUser = async (req, res, next) => {
+  try {
+    const contract = getContractInstance();
+
+    const { walletId } = req.user;
+
+    if (!walletId) {
+      return res.status(400).json({ message: "Invalid or missing wallet ID." });
+    }
+
+    const offers = await contract.methods.getActiveOffers().call();
+
+    const userOffers = offers.filter(
+      (offer) => offer.seller.toLowerCase() === walletId.toLowerCase()
+    );
+
+    res.status(200).json({
+      success: true,
+      offers: userOffers.map((offer) => ({
+        offerId: offer.id.toString(),
+        seller: offer.seller,
+        amount: offer.energyAmount.toString(),
+        pricePerUnit: offer.pricePerUnit.toString(),
+        expiry: offer.auctionEndTime.toString(),
+        status: offer.auctionEnded,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching user's offers:", error);
+    next(error);
+  }
+};
+
+module.exports = { createOffer, listOffer, endOffer, getOffersByUser };
