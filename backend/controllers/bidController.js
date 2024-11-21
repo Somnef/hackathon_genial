@@ -1,9 +1,9 @@
 const { getContractInstance, web3 } = require("../utils/contractUtil");
 const GlobalError = require("../utils/GlobalError");
-const User = require("../models/User"); // User model for database access
+const User = require("../models/User");
 
 const createBid = async (req, res, next) => {
-    const {offerId, pricePerUnit } = req.body;
+    const { offerId, pricePerUnit } = req.body;
 
     try {
         if (!offerId || !pricePerUnit) {
@@ -12,8 +12,7 @@ const createBid = async (req, res, next) => {
 
         const userId = req.user.id;
 
-        const user = await User.findById(userId
-        );
+        const user = await User.findById(userId);
         if (!user || !user.walletId || !user.privateKey) {
             throw new GlobalError("User wallet or private key not found", 404);
         }
@@ -23,12 +22,13 @@ const createBid = async (req, res, next) => {
 
         const contract = getContractInstance();
 
-        const callFun = contract.methods.bidEnergy(offerId, pricePerUnit);
-        const gas = await callFun.estimateGas({ from: walletId });
+        const callFun = contract.methods.placeBid(offerId);
+        const gas = await callFun.estimateGas({ 
+            from: walletId
+        });
         const gasPrice = await web3.eth.getGasPrice();
         const nonce = await web3.eth.getTransactionCount(walletId, "latest");
         const chainId = await web3.eth.getChainId();
-
 
         const tx = {
             from: walletId,
@@ -36,38 +36,39 @@ const createBid = async (req, res, next) => {
             gas,
             gasPrice,
             data: callFun.encodeABI(),
+            value: pricePerUnit,
             nonce,
             chainId,
         };
 
         const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
 
-        const txHash = await web3.eth.sendSignedTransaction(
+        const txReceipt = await web3.eth.sendSignedTransaction(
             signedTx.rawTransaction
-        );
-
-        const receipt = await web3.eth.getTransactionReceipt(
-            txHash.transactionHash
         );
 
         res.status(201).json({
             success: true,
             message: "Energy bid created successfully",
-            transactionHash: receipt.transactionHash,
+            transactionHash: txReceipt.transactionHash,
         });
     }
     catch (error) {
+        // Handle potential revert errors from the blockchain
+        if (error.message.includes('revert')) {
+            return next(new GlobalError("Bid failed. Possible reasons: auction ended, bid too low, or seller attempting to bid.", 400));
+        }
         console.error("Error creating energy bid:", error);
         next(error);
     }
-  };
+};
 
 const listBids = async (req, res, next) => {
     try {
         const contract = getContractInstance();
         const { offerId } = req.params;
 
-        const bids = await contract.methods.getBids(offerId).call();
+        const bids = await contract.methods.getBidsByOffer(offerId).call();
         res.status(200).json({
             success: true,
             message: "Bids retrieved successfully",
@@ -77,7 +78,7 @@ const listBids = async (req, res, next) => {
         console.error("Error listing bids:", error);
         next(error);
     }
-}
+};
 
 module.exports = {
     createBid,
