@@ -7,12 +7,24 @@
         <RouterLink :to="{ name: 'login' }" class="font-semibold text-primary">Login</RouterLink>
       </p>
 
+      <!-- Name Input -->
+      <VaInput
+        v-model="formData.name"
+        class="mb-4"
+        label="Full Name"
+        type="text"
+        placeholder="Enter your name"
+        required
+      />
+
       <!-- Email Input -->
       <VaInput
         v-model="formData.email"
         class="mb-4"
         label="Email"
         type="email"
+        placeholder="Enter your email"
+        required
       />
 
       <!-- Password Input -->
@@ -24,6 +36,7 @@
           class="mb-4"
           label="Password"
           messages="Password should be 8+ characters: letters, numbers, and special characters."
+          placeholder="Enter your password"
           @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
         >
           <template #appendInner>
@@ -36,6 +49,7 @@
           :type="isPasswordVisible.value ? 'text' : 'password'"
           class="mb-4"
           label="Repeat Password"
+          placeholder="Repeat your password"
           @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
         >
           <template #appendInner>
@@ -44,44 +58,61 @@
       </VaValue>
 
       <!-- Submit Button -->
-      <VaButton :to="{ name: 'main' }" class="w-full mt-4" preset="secondary" @click="submit">Create account</VaButton>
+      <button class="w-full mt-4" preset="secondary" @click="submit">Create account</button>
     </VaForm>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useForm, useToast } from 'vuestic-ui'
-import { VaIcon } from 'vuestic-ui';
+import { reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'vuestic-ui';
+import axios from 'axios';
 
-const { validate } = useForm('form')
-const { push } = useRouter()
-const { init } = useToast()
+const router = useRouter();
+const toast = useToast();
 
 const formData = reactive({
+  name: '',
   email: '',
   password: '',
   repeatPassword: '',
-})
+});
 
-const submit = () => {
-  if (validate()) {
-    init({
-      message: "You've successfully signed up",
-      color: 'success',
-    })
-    push({ name: 'main' })
+const submit = async () => {
+  // Validate that passwords match
+  if (formData.password !== formData.repeatPassword) {
+    toast.init({
+      message: 'Passwords do not match!',
+      color: 'danger',
+    });
+    return;
   }
-}
 
-const passwordRules: ((v: string) => boolean | string)[] = [
-  (v) => !!v || 'Password field is required',
-  (v) => (v && v.length >= 8) || 'Password must be at least 8 characters long',
-  (v) => (v && /[A-Za-z]/.test(v)) || 'Password must contain at least one letter',
-  (v) => (v && /\d/.test(v)) || 'Password must contain at least one number',
-  (v) => (v && /[!@#$%^&*(),.?":{}|<>]/.test(v)) || 'Password must contain at least one special character',
-]
+  try {
+    // Make a POST request to the backend
+    const response = await axios.post('http://localhost:3000/api/user/auth/sign-up', {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (response.status === 201) { // Assuming backend returns 201 for success
+      toast.init({
+        message: "You've successfully signed up!",
+        color: 'success',
+      });
+      router.push({ name: 'login' }); // Redirect to login page
+    }
+  } catch (error) {
+    // Handle backend errors
+    toast.init({
+      message: error.response?.data?.message || 'Sign-up failed. Please try again.',
+      color: 'danger',
+    });
+    console.error(error);
+  }
+};
 </script>
 
 <style scoped>
@@ -92,14 +123,25 @@ const passwordRules: ((v: string) => boolean | string)[] = [
   justify-content: center;
   height: 100%;
   width: 100%;
-  background-color: var(--va-background-secondary); /* Ensure background matches Login */
+  background-color: var(--va-background-secondary);
 }
 
 .signup-form {
   display: flex;
-  flex-direction: column; /* Stack items vertically */
+  flex-direction: column;
   max-width: 400px;
   width: 100%;
   padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-input {
+  margin-bottom: 16px;
+}
+
+.VaButton {
+  width: 100%;
 }
 </style>
