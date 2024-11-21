@@ -55,15 +55,15 @@ const signUp = async (req, res, next) => {
 
     // Call registerUser() on the smart contract
     const callFun = contract.methods.registerUser(walletId); // Pass walletId to the smart contract
-    const tx = {
-      from: walletId,
-      to: contractAddress,
-      gas: await callFun.estimateGas({ from: walletId }),
-      gasPrice: gasPrice,
-      data: callFun.encodeABI(),
-      nonce: nonce,
-      chainId: chainId,
-    };
+    // const tx = {
+    //   from: walletId,
+    //   to: contractAddress,
+    //   gas: await callFun.estimateGas({ from: walletId }),
+    //   gasPrice: gasPrice,
+    //   data: callFun.encodeABI(),
+    //   nonce: nonce,
+    //   chainId: chainId,
+    // };
 
     // // Sign the transaction
     // const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);

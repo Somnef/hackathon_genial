@@ -4,6 +4,7 @@ const bidController = require("../controllers/bidController");
 // const blockchainController = require("../controllers/blockchainController");
 const authController = require("../controllers/authController");
 const errorHandler = require("../middleware/errorHandler"); // Your custom error handler
+const authMiddleware = require("../middleware/authMiddleware").verifyToken;
 
 const router = express.Router();
 
@@ -15,17 +16,21 @@ const router = express.Router();
 
 router.post("/api/user/auth/sign-up", authController.signUp);
 router.post("/api/user/auth/login", authController.login);
-router.get("/api/auth/me", authController.getMe);
+router.get("/api/auth/me", authMiddleware, authController.getMe);
 
 // Offer routes
 
 // contract.methods.offerEnergy
-router.post("/api/offer/create", offerController.createOffer);
+router.post("/api/offer/create", authMiddleware, offerController.createOffer);
 // router.get("/api/offer/list", offerController.listOffer);
 
 // Auction bid routes
-router.post("/api/auction/bid/create", bidController.createBid);
-router.get("/api/auction/bid/list/:offerId", bidController.listBids);
+router.post("/api/auction/bid/create", authMiddleware, bidController.createBid);
+router.get(
+  "/api/auction/bid/list/:offerId",
+  authMiddleware,
+  bidController.listBids
+);
 
 // Blockchain routes
 // router.post("/api/blockchain/transaction", blockchainController.transaction);
