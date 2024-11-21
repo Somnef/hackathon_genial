@@ -21,20 +21,6 @@ const desserts = [
     carbs: 24,
     protein: 4,
   },
-  {
-    dessert: 'Cupcake',
-    calories: 305,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Gingerbread',
-    calories: 356,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
 ]
 </script>
 

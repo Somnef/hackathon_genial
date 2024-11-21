@@ -40,9 +40,12 @@
       </div>
 
       <!-- Submit Button -->
-      <VaButton :to="{ name: 'main' }" class="w-full" style="z-index: 1;" preset="secondary" @click="submit">
-        Login
-      </VaButton>
+      <button 
+      class="w-full px-6 py-2 bg-blue-800 text-white rounded shadow-md hover:bg-white border-2 border-transparent hover:border-blue-800 hover:text-blue-800 cursor-pointer transition duration-200"
+      @click="navigateToExternalUrl">
+      Login
+      </button>
+
     </VaForm>
   </div>
 </template>
@@ -69,6 +72,12 @@ const submit = () => {
     push({ name: 'dashboard' })
   }
 }
+
+const navigateToExternalUrl = () => {
+    // Redirect to a different port or domain
+    window.location.href = 'http://localhost:8000/dashboard'; // This will navigate to the new URL and replace the current page
+  }
+
 </script>
 
 <style scoped>
