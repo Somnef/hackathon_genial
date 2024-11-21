@@ -66,29 +66,50 @@ const formData = reactive({
 
 const handleSubmit = async () => {
   try {
-    // Make a POST request to the backend
     const response = await axios.post('http://localhost:3000/api/user/auth/login', {
       email: formData.email,
       password: formData.password,
-    })
+    });
 
     if (response.status === 200) {
-      // Show a success toast message
-      toast.init({ message: "You've successfully logged in", color: 'success' })
+      const token = response.data.token;
 
-      // Redirect to the dashboard
-      //router.push({ name: 'dashboard' })
-      window.location.href = "http://localhost:8000/dashboard"
+      // Store the token temporarily in the URL
+      window.location.href = `http://localhost:8000/dashboard?token=${token}`;
     }
   } catch (error) {
-    // Handle login failure
     toast.init({
       message: 'Login failed. Please check your email and password.',
       color: 'danger',
-    })
-    console.error(error)
+    });
+    console.error(error);
   }
-}
+};
+
+// Function to fetch user info after login
+const fetchUserInfo = async (token: string) => {
+  try {
+    const response = await axios.get('http://localhost:3000/api/user/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    });
+
+    // Log the full response object to inspect its structure
+    console.log('Full API Response:', response.data);
+
+    // Assuming the response structure is like { walletId: 'wallet123' }
+    const walletId = response.data.walletId;
+    if (walletId) {
+      console.log('Wallet ID:', walletId);
+    } else {
+      console.log('Wallet ID not found');
+    }
+
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+  }
+};
 </script>
 
 <style scoped>
