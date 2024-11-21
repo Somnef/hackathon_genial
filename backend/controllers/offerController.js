@@ -3,7 +3,8 @@ const GlobalError = require("../utils/GlobalError");
 const User = require("../models/User"); // User model for database access
 
 const createOffer = async (req, res, next) => {
-  const { amount, pricePerUnit, expiry, startingPrice } = req.body;
+  const { amount, expiry, startingPrice } = req.body;
+  const pricePerUnit = "1";
 
   try {
     if (!amount || !pricePerUnit || !expiry || !startingPrice) {
