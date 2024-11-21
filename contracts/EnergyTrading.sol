@@ -57,7 +57,7 @@ contract EnergyTrading {
     }
 
     // Offer energy for sale
-    function offerEnergy(uint256 _energyAmount, uint256 _pricePerUnit, uint256 _auctionDurationMinutes) external onlyRegisteredUser {
+    function offerEnergy(uint256 _energyAmount, uint256 _pricePerUnit, uint256 _startingPrice, uint256 _auctionDurationMinutes) external onlyRegisteredUser {
         require(_energyAmount > 0, "Energy amount must be greater than zero.");
         require(_pricePerUnit > 0, "Price per unit must be greater than zero.");
 
@@ -70,7 +70,7 @@ contract EnergyTrading {
             pricePerUnit: _pricePerUnit,
             auctionEndTime: auctionEndTime,
             highestBidder: address(0),
-            highestBid: 0,
+            highestBid: _startingPrice,
             auctionEnded: false
         }));
 
@@ -78,58 +78,31 @@ contract EnergyTrading {
     }
 
     // Place a bid on an energy offer
-    function placeBid(uint256 offerId, uint256 _bidAmount) external onlyRegisteredUser payable {
-
-        // Check if the offer exists
-        require(offerId < energyOffers.length, "Offer does not exist.");
-
+    function placeBid(uint256 offerId) external onlyRegisteredUser payable {
+        // Automatically end the auction if the time has expired
+        _endAuctionIfExpired(offerId);
+        
         EnergyOffer storage offer = energyOffers[offerId];
 
-        // Check if the auction has ended
         require(!offer.auctionEnded, "Auction has ended.");
+        require(offer.seller != msg.sender, "Seller cannot bid on their own offer.");
 
-        // Check if the auction time has not expired
-        require(block.timestamp < offer.auctionEndTime, "Auction time has expired.");
+        require(block.timestamp < offer.auctionEndTime, "Auction has ended.");
+        require(msg.value > offer.highestBid, "Bid must be higher than the current highest bid.");
 
-        // Check if the bid amount is higher than the current highest bid
-        require(_bidAmount > offer.highestBid, "Bid amount must be higher than the current highest bid.");
-
-        // Check if bidder has previously placed a bid and refund the previous bid
-        for (uint256 i = 0; i < bids.length; i++) {
-            if (bids[i].offerId == offerId && bids[i].bidder == msg.sender) {
-
-                // Deduct the amount already in bid from the new bid amount
-                uint256 addedAmount = _bidAmount - bids[i].amount;
-
-                // Check if the added amount exists in the bidder's balance
-                require(msg.sender.balance >= addedAmount, "Insufficient balance.");
-
-                payable(msg.sender).transfer(bids[i].amount);
-                bids[i].amount += addedAmount;
-
-                // Update the highest bid
-                offer.highestBidder = msg.sender;
-                offer.highestBid = _bidAmount;
-
-                emit NewBid(msg.sender, msg.value);
-                return;
-            }
+        // Refund the previous highest bidder
+        if (offer.highestBidder != address(0)) {
+            payable(offer.highestBidder).transfer(offer.highestBid);
         }
-
-        // Check if the bid amount exists in the bidder's balance
-        require(msg.sender.balance >= _bidAmount, "Insufficient balance.");
-
-        // Transfer the bid amount to the contract
-        owner.transfer(_bidAmount);
 
         // Update the highest bid
         offer.highestBidder = msg.sender;
-        offer.highestBid = _bidAmount;
+        offer.highestBid = msg.value;
 
         // Store the bid
         bids.push(Bid({
             bidder: msg.sender,
-            amount: _bidAmount,
+            amount: msg.value,
             offerId: offerId
         }));
 
@@ -163,11 +136,11 @@ contract EnergyTrading {
     function endAuction(uint256 offerId) external onlySeller(offerId) {
         EnergyOffer storage offer = energyOffers[offerId];
 
+        // Auction has already been ended automatically or manually
+        require(!offer.auctionEnded, "Auction has not ended yet.");
+
         // Automatically check if auction time has passed and end it
         _endAuctionIfExpired(offerId);
-
-        // Auction has already been ended automatically or manually
-        require(offer.auctionEnded, "Auction has not ended yet.");
     }
 
     // Get all active (running) offers
@@ -197,7 +170,7 @@ contract EnergyTrading {
     }
 
     // Get all bids for a specific offer
-    function getBids(uint256 offerId) external view returns (Bid[] memory) {
+    function getBidsByOffer(uint256 offerId) external view returns (Bid[] memory) {
         uint256 bidCount = 0;
 
         // Count how many bids are placed on the offer
@@ -220,5 +193,57 @@ contract EnergyTrading {
         }
 
         return offerBids;
+    }
+
+    // Get all offers by a specific user
+    function getOffersByUser(address user) external view returns (EnergyOffer[] memory) {
+        uint256 userOfferCount = 0;
+
+        // Count how many offers the user has
+        for (uint256 i = 0; i < energyOffers.length; i++) {
+            if (energyOffers[i].seller == user) {
+                userOfferCount++;
+            }
+        }
+
+        // Allocate space for user offers
+        EnergyOffer[] memory userOffers = new EnergyOffer[](userOfferCount);
+        uint256 index = 0;
+
+        // Store the offers by the user
+        for (uint256 i = 0; i < energyOffers.length; i++) {
+            if (energyOffers[i].seller == user) {
+                userOffers[index] = energyOffers[i];
+                index++;
+            }
+        }
+
+        return userOffers;
+    }
+
+    // Get all bids by a specific user
+    function getBidsByUser(address user) external view returns (Bid[] memory) {
+        uint256 userBidCount = 0;
+
+        // Count how many bids the user has placed
+        for (uint256 i = 0; i < bids.length; i++) {
+            if (bids[i].bidder == user) {
+                userBidCount++;
+            }
+        }
+
+        // Allocate space for user bids
+        Bid[] memory userBids = new Bid[](userBidCount);
+        uint256 index = 0;
+
+        // Store the bids by the user
+        for (uint256 i = 0; i < bids.length; i++) {
+            if (bids[i].bidder == user) {
+                userBids[index] = bids[i];
+                index++;
+            }
+        }
+
+        return userBids;
     }
 }
