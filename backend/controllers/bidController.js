@@ -1,67 +1,86 @@
 const { getContractInstance, web3 } = require("../utils/contractUtil");
 const GlobalError = require("../utils/GlobalError");
+const User = require("../models/User");
 
 const createBid = async (req, res, next) => {
-  const { offerId, bidAmount } = req.body;
+    const { offerId, pricePerUnit } = req.body;
 
-  try {
-    if (!offerId || !bidAmount) {
-      throw new GlobalError("Missing required fields", 400);
+    try {
+        if (!offerId || !pricePerUnit) {
+            throw new GlobalError("Missing required fields", 400);
+        }
+
+        const userId = req.user.id;
+
+        const user = await User.findById(userId);
+        if (!user || !user.walletId || !user.privateKey) {
+            throw new GlobalError("User wallet or private key not found", 404);
+        }
+
+        const walletId = user.walletId;
+        const privateKey = user.privateKey;
+
+        const contract = getContractInstance();
+
+        const callFun = contract.methods.placeBid(offerId);
+        const gas = await callFun.estimateGas({ 
+            from: walletId
+        });
+        const gasPrice = await web3.eth.getGasPrice();
+        const nonce = await web3.eth.getTransactionCount(walletId, "latest");
+        const chainId = await web3.eth.getChainId();
+
+        const tx = {
+            from: walletId,
+            to: contract.options.address,
+            gas,
+            gasPrice,
+            data: callFun.encodeABI(),
+            value: pricePerUnit,
+            nonce,
+            chainId,
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+
+        const txReceipt = await web3.eth.sendSignedTransaction(
+            signedTx.rawTransaction
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Energy bid created successfully",
+            transactionHash: txReceipt.transactionHash,
+        });
     }
-
-    if (bidAmount <= 0) {
-      throw new GlobalError("Bid amount must be greater than zero", 400);
+    catch (error) {
+        // Handle potential revert errors from the blockchain
+        if (error.message.includes('revert')) {
+            return next(new GlobalError("Bid failed. Possible reasons: auction ended, bid too low, or seller attempting to bid.", 400));
+        }
+        console.error("Error creating energy bid:", error);
+        next(error);
     }
-
-    const contract = getContractInstance();
-    const accounts = await web3.eth.getAccounts();
-
-    const bidder = accounts[0]; // Assuming the first account is the bidder
-
-    // Check if the offer exists (you can add this if your contract supports offer validation)
-    const offer = await contract.methods.getOffer(+offerId).call();
-    if (!offer) {
-      throw new GlobalError("Offer not found", 404);
-    }
-
-    // Proceed to create the bid in the smart contract
-    const receipt = await contract.methods
-      .placeBid(offerId, bidAmount)
-      .send({ from: bidder.walletId });
-
-    // Send a successful response
-    res.status(201).json({
-      success: true,
-      message: "Bid placed successfully",
-      bidId: receipt.events.BidPlaced.returnValues.bidId,
-      transactionHash: receipt.transactionHash,
-    });
-  } catch (error) {
-    next(error);
-  }
 };
 
 const listBids = async (req, res, next) => {
-  const { offerId } = req.params;
+    try {
+        const contract = getContractInstance();
+        const { offerId } = req.params;
 
-  try {
-    if (!offerId) {
-      throw new GlobalError("Offer ID is required", 400);
+        const bids = await contract.methods.getBidsByOffer(offerId).call();
+        res.status(200).json({
+            success: true,
+            message: "Bids retrieved successfully",
+            bids,
+        });
+    } catch (error) {
+        console.error("Error listing bids:", error);
+        next(error);
     }
-
-    // Get contract instance
-    const contract = getContractInstance();
-
-    // Get all bids for the given offerId
-    const bids = await contract.methods.getBids(+offerId).call();
-
-    res.status(200).json({
-      success: true,
-      bids,
-    });
-  } catch (error) {
-    next(error);
-  }
 };
 
-module.exports = { createBid, listBids };
+module.exports = {
+    createBid,
+    listBids,
+};

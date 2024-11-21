@@ -3,10 +3,11 @@ const GlobalError = require("../utils/GlobalError");
 const User = require("../models/User"); // User model for database access
 
 const createOffer = async (req, res, next) => {
-  const { amount, pricePerUnit, expiry } = req.body;
+  const { amount, expiry, startingPrice } = req.body;
+  const pricePerUnit = "1";
 
   try {
-    if (!amount || !pricePerUnit || !expiry) {
+    if (!amount || !pricePerUnit || !expiry || !startingPrice) {
       throw new GlobalError("Missing required fields", 400);
     }
 
@@ -22,7 +23,12 @@ const createOffer = async (req, res, next) => {
 
     const contract = getContractInstance();
 
-    const callFun = contract.methods.offerEnergy(amount, pricePerUnit, expiry);
+    const callFun = contract.methods.offerEnergy(
+      amount,
+      pricePerUnit,
+      expiry,
+      startingPrice
+    );
     const gas = await callFun.estimateGas({ from: walletId });
     const gasPrice = await web3.eth.getGasPrice();
     const nonce = await web3.eth.getTransactionCount(walletId, "latest");
@@ -139,4 +145,37 @@ const endOffer = async (req, res, next) => {
   }
 };
 
-module.exports = { createOffer, listOffer, endOffer };
+const getOffersByUser = async (req, res, next) => {
+  try {
+    const contract = getContractInstance();
+
+    const { walletId } = req.user;
+
+    if (!walletId) {
+      return res.status(400).json({ message: "Invalid or missing wallet ID." });
+    }
+
+    const offers = await contract.methods.getActiveOffers().call();
+
+    const userOffers = offers.filter(
+      (offer) => offer.seller.toLowerCase() === walletId.toLowerCase()
+    );
+
+    res.status(200).json({
+      success: true,
+      offers: userOffers.map((offer) => ({
+        offerId: offer.id.toString(),
+        seller: offer.seller,
+        amount: offer.energyAmount.toString(),
+        pricePerUnit: offer.pricePerUnit.toString(),
+        expiry: offer.auctionEndTime.toString(),
+        status: offer.auctionEnded,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching user's offers:", error);
+    next(error);
+  }
+};
+
+module.exports = { createOffer, listOffer, endOffer, getOffersByUser };

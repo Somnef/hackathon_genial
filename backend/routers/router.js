@@ -24,6 +24,7 @@ router.get("/api/user/me", authMiddleware, authController.getMe);
 router.post("/api/offer/create", authMiddleware, offerController.createOffer);
 router.get("/api/offer/list", authMiddleware, offerController.listOffer);
 router.post("/api/offer/end", authMiddleware, offerController.endOffer);
+router.get("/api/user/offers", authMiddleware, offerController.getOffersByUser);
 
 // Auction bid routes
 router.post("/api/auction/bid/create", authMiddleware, bidController.createBid);
