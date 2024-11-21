@@ -6,7 +6,6 @@ const createOffer = async (req, res, next) => {
   const { amount, pricePerUnit, expiry } = req.body;
 
   try {
-    // Validation
     if (!amount || !pricePerUnit || !expiry) {
       throw new GlobalError("Missing required fields", 400);
     }
@@ -60,4 +59,27 @@ const createOffer = async (req, res, next) => {
   }
 };
 
-module.exports = { createOffer };
+const listOffer = async (req, res, next) => {
+  try {
+    const contract = getContractInstance();
+
+    const offers = await contract.methods.getActiveOffers().call();
+
+    res.status(200).json({
+      success: true,
+      offers: offers.map((offer) => ({
+        offerId: offer.id.toString(),
+        seller: offer.seller,
+        amount: offer.energyAmount.toString(),
+        pricePerUnit: offer.pricePerUnit.toString(),
+        expiry: offer.auctionEndTime.toString(),
+        status: offer.auctionEnded,
+      })),
+    });
+  } catch (error) {
+    console.error("Error listing offers:", error);
+    next(error);
+  }
+};
+
+module.exports = { createOffer, listOffer };
