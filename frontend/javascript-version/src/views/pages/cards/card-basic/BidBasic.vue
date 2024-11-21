@@ -4,31 +4,59 @@ import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import eCommerce2 from '@images/eCommerce/2.png'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
 // Sample avatars
-const avatars = [
-  avatar1,
-  avatar2,
-  avatar3,
-  avatar4,
-]
+const avatars = [avatar1, avatar2, avatar3, avatar4]
 
-// Slider values for each card
-const sliderValues = ref([899, 899, 899, 899, 899, 899]) // Initial value set to price
-
-const isCardDetailsVisible = ref(false)
-
-// Price constant for validation
-const price = 899
+// State for fetched offers
+const offers = ref([])
+const bidAmounts = ref([]) // To track slider values for each offer
 
 // Alert state
 const alertVisible = ref(false)
 const alertMessage = ref('')
 
+// Fetch offers on component mount
+onMounted(async () => {
+  try {
+    const token = localStorage.getItem('auth_token') // Retrieve token from localStorage
+
+    if (!token) {
+      throw new Error('Authentication token not found.')
+    }
+
+    const response = await axios.get('http://localhost:3000/api/offer/list', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    // Assign fetched offers to state and initialize bid amounts
+    offers.value = response.data.offers
+    bidAmounts.value = offers.value.map(() => 1) // Default bid to 1 unit for each offer
+    console.log("Offers:", offers.value)
+  } catch (error) {
+    console.error('Failed to fetch offers:', error)
+    alertMessage.value = 'Error fetching offers. Please try again later.'
+    alertVisible.value = true
+  }
+})
+
+// Format Seller ID
+function formatSeller(seller) {
+  if (seller.length > 10) {
+    return seller.slice(0, 10) + '*****'
+  }
+  return seller
+}
+
 // Handle Buy Button Click
 function handleBuyClick(index) {
-  alertMessage.value = `You have purchased ${sliderValues.value[index]} units for card ${index + 1}`
+  const offer = offers.value[index]
+  const bidAmount = bidAmounts.value[index]
+  alertMessage.value = `You have purchased ${bidAmount} units from seller ${formatSeller(offer.seller)} for $${offer.pricePerUnit}/unit`
   alertVisible.value = true
 }
 </script>
@@ -49,8 +77,8 @@ function handleBuyClick(index) {
     <VRow>
       <!-- Cards -->
       <VCol
-        v-for="(value, index) in sliderValues"
-        :key="index"
+        v-for="(offer, index) in offers"
+        :key="offer.offerId"
         sm="6"
         cols="12"
       >
@@ -68,39 +96,47 @@ function handleBuyClick(index) {
 
             <div>
               <VCardItem>
-                <VCardTitle>Energy Units {{ index + 1 }}000 Kilo Watts</VCardTitle>
+                <VCardTitle>Offer {{ offer.offerId }}</VCardTitle>
               </VCardItem>
 
               <VCardText>
-                Description for the text
+                Seller: {{ formatSeller(offer.seller) }}
               </VCardText>
 
               <VCardText class="text-subtitle-1">
-                <span>Price :</span> <span class="font-weight-medium">${{ price }}</span>
+                <span>Amount :</span>
+                <span class="font-weight-medium">{{ offer.amount }} units</span>
               </VCardText>
 
-              <VCardActions>
-                <!-- Slider with Validation -->
+              <VCardText class="text-subtitle-1">
+                <span>Price per Unit :</span>
+                <span class="font-weight-medium">${{ offer.pricePerUnit }}</span>
+              </VCardText>
+
+              <VCardText class="text-subtitle-1">
+                <span>Expiry :</span>
+                <span class="font-weight-medium">{{ new Date(offer.expiry * 1000).toLocaleString() }}</span>
+              </VCardText>
+
+              <!-- Slider for selecting bid amount -->
+              <VCardText class="text-subtitle-1">
+                <span>Bid Amount:</span>
                 <VSlider
-                  v-model="sliderValues[index]"
-                  class="ma-3"
-                  :min="price"
-                  max="10000"
-                  label="Quantity"
-                  @update:model-value="value => { if (value < price) sliderValues[index] = price }"
+                  v-model="bidAmounts[index]"
+                  :max="offer.amount"
+                  min="1"
+                  step="1"
+                  class="mt-2"
                 />
-              </VCardActions>
+                <span>{{ bidAmounts[index] }} units</span>
+              </VCardText>
 
               <VCardActions class="justify-space-between">
-                <!-- Buy Button on Next Line -->
+                <!-- Buy Button -->
                 <VBtn @click="handleBuyClick(index)">
                   <VIcon icon="bx-cart-add" />
                   <span class="ms-2">Buy</span>
                 </VBtn>
-              </VCardActions>
-
-              <VCardActions class="justify-space-between">
-            
               </VCardActions>
             </div>
           </div>
