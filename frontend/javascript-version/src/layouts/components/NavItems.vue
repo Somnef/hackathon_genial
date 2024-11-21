@@ -43,7 +43,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
 
   <VerticalNavLink
     :item="{
-      title: 'Biddings',
+      title: 'Offers',
       icon: 'bx-credit-card',
       to: '/bids',
     }"
