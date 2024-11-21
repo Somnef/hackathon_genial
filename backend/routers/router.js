@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.post("/api/user/auth/sign-up", authController.signUp);
 router.post("/api/user/auth/login", authController.login);
-router.get("/api/auth/me", authMiddleware, authController.getMe);
+router.get("/api/user/me", authMiddleware, authController.getMe);
 
 // Offer routes
 
