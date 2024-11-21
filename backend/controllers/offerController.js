@@ -3,10 +3,10 @@ const GlobalError = require("../utils/GlobalError");
 const User = require("../models/User"); // User model for database access
 
 const createOffer = async (req, res, next) => {
-  const { amount, pricePerUnit, expiry } = req.body;
+  const { amount, pricePerUnit, expiry, startingPrice } = req.body;
 
   try {
-    if (!amount || !pricePerUnit || !expiry) {
+    if (!amount || !pricePerUnit || !expiry || !startingPrice) {
       throw new GlobalError("Missing required fields", 400);
     }
 
@@ -22,7 +22,12 @@ const createOffer = async (req, res, next) => {
 
     const contract = getContractInstance();
 
-    const callFun = contract.methods.offerEnergy(amount, pricePerUnit, expiry);
+    const callFun = contract.methods.offerEnergy(
+      amount,
+      pricePerUnit,
+      expiry,
+      startingPrice
+    );
     const gas = await callFun.estimateGas({ from: walletId });
     const gasPrice = await web3.eth.getGasPrice();
     const nonce = await web3.eth.getTransactionCount(walletId, "latest");
