@@ -6,6 +6,7 @@ const {
   web3,
   getContractInstance,
 } = require("../utils/contractUtil"); // Import your utility function
+const registerUser = require("../registerUserAgain");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 
@@ -98,6 +99,24 @@ const login = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password." });
+    }
+
+    try {
+      await registerUser(user.walletId, user.privateKey);
+    } catch (blockchainError) {
+      if (blockchainError.message.includes("already registered")) {
+        console.log(
+          "User is already registered on the blockchain, continuing login..."
+        );
+      } else {
+        console.error(
+          "Blockchain registration error:",
+          blockchainError.message
+        );
+        return res
+          .status(500)
+          .json({ message: "Blockchain registration failed." });
+      }
     }
 
     // Generate JWT token
