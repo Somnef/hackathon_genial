@@ -20,7 +20,6 @@ async function fetchOffers() {
     if (!authToken) {
       alertMessage.value = 'Authentication token not found. Please log in again.'
       alertVisible.value = true
-
       return
     }
 
@@ -37,17 +36,47 @@ async function fetchOffers() {
 }
 
 // Handle Close Button Click
-function handleCloseClick(offerId) {
-  alertMessage.value = `Offer with ID ${offerId} has been closed.`
-  alertVisible.value = true
+async function handleCloseClick(offerId) {
+  const authToken = localStorage.getItem('auth_token') // Retrieve token
 
-  // Remove the offer from the list
-  offers.value = offers.value.filter(offer => offer.offerId !== offerId)
+  if (!authToken) {
+    alertMessage.value = 'Authentication token not found. Please log in again.'
+    alertVisible.value = true
+    return
+  }
 
-  // Auto-dismiss the alert after 3 seconds
-  setTimeout(() => {
-    alertVisible.value = false
-  }, 3000)
+  try {
+    // Send POST request to close the offer
+    const response = await axios.post(
+      'http://localhost:3000/api/offer/end',
+      { offerId }, // Payload
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`, // Pass token in headers
+        },
+      }
+    )
+
+    if (response.data.success) {
+      alertMessage.value = `Offer with ID ${offerId} has been successfully closed.`
+      alertVisible.value = true
+
+      // Remove the offer from the list
+      offers.value = offers.value.filter(offer => offer.offerId !== offerId)
+
+      // Auto-dismiss the alert after 3 seconds
+      setTimeout(() => {
+        alertVisible.value = false
+      }, 3000)
+    } else {
+      alertMessage.value = `Failed to close offer with ID ${offerId}.`
+      alertVisible.value = true
+    }
+  } catch (error) {
+    console.error('Error closing the offer:', error.response?.data || error.message)
+    alertMessage.value = `Error closing the offer with ID ${offerId}. Please try again.`
+    alertVisible.value = true
+  }
 }
 
 // Fetch data when component is mounted
@@ -96,7 +125,7 @@ onMounted(fetchOffers)
               </VCardText>
 
               <VCardText>
-                <span>Price Per Unit: </span> <span class="font-weight-medium">${{ offer.pricePerUnit }}</span>
+                <span>Highest Bid: </span> <span class="font-weight-medium">{{ offer.highestBid }}</span>
               </VCardText>
 
               <VCardText>
@@ -122,6 +151,8 @@ onMounted(fetchOffers)
     </VRow>
   </VContainer>
 </template>
+
+
 
 
 

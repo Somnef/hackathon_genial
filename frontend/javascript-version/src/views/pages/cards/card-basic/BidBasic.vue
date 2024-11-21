@@ -4,8 +4,8 @@ import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import eCommerce2 from '@images/eCommerce/2.png'
-import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { onMounted, ref } from 'vue'
 
 // Sample avatars
 const avatars = [avatar1, avatar2, avatar3, avatar4]
@@ -36,7 +36,7 @@ onMounted(async () => {
     // Assign fetched offers to state and initialize bid amounts
     offers.value = response.data.offers
     bidAmounts.value = offers.value.map(() => 1) // Default bid to 1 unit for each offer
-    console.log("Offers:", offers.value)
+    console.log('Offers:', offers.value)
   } catch (error) {
     console.error('Failed to fetch offers:', error)
     alertMessage.value = 'Error fetching offers. Please try again later.'
@@ -49,6 +49,7 @@ function formatSeller(seller) {
   if (seller.length > 10) {
     return seller.slice(0, 10) + '*****'
   }
+
   return seller
 }
 
@@ -56,7 +57,8 @@ function formatSeller(seller) {
 function handleBuyClick(index) {
   const offer = offers.value[index]
   const bidAmount = bidAmounts.value[index]
-  alertMessage.value = `You have purchased ${bidAmount} units from seller ${formatSeller(offer.seller)} for $${offer.pricePerUnit}/unit`
+
+  alertMessage.value = `You have placed a bid of ${bidAmount} on offer ${offer.offerId} from seller ${formatSeller(offer.seller)}.`
   alertVisible.value = true
 }
 </script>
@@ -105,12 +107,7 @@ function handleBuyClick(index) {
 
               <VCardText class="text-subtitle-1">
                 <span>Amount :</span>
-                <span class="font-weight-medium">{{ offer.amount }} units</span>
-              </VCardText>
-
-              <VCardText class="text-subtitle-1">
-                <span>Price per Unit :</span>
-                <span class="font-weight-medium">${{ offer.pricePerUnit }}</span>
+                <span class="font-weight-medium">{{ offer.amount }}</span>
               </VCardText>
 
               <VCardText class="text-subtitle-1">
@@ -128,11 +125,11 @@ function handleBuyClick(index) {
                   step="1"
                   class="mt-2"
                 />
-                <span>{{ bidAmounts[index] }} units</span>
+                <span>{{ bidAmounts[index] }} </span>
               </VCardText>
 
               <VCardActions class="justify-space-between">
-                <!-- Buy Button -->
+                <!-- Bid Button -->
                 <VBtn @click="handleBuyClick(index)">
                   <VIcon icon="bx-cart-add" />
                   <span class="ms-2">Bid</span>
@@ -145,6 +142,7 @@ function handleBuyClick(index) {
     </VRow>
   </VContainer>
 </template>
+
 
 <style lang="scss" scoped>
 .avatar-center {
