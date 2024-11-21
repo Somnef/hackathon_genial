@@ -80,6 +80,7 @@ const listOffer = async (req, res, next) => {
         pricePerUnit: offer.pricePerUnit.toString(),
         expiry: offer.auctionEndTime.toString(),
         status: offer.auctionEnded,
+        highestBid: offer.highestBid.toString(),
       })),
     });
   } catch (error) {

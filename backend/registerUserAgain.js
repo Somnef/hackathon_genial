@@ -10,9 +10,9 @@ const {
 async function registerUser() {
   try {
     const contract = getContractInstance();
-    const walletId = "0xc28854ac599aA7AE052bAc7BDA90afFEF46A10FE";
+    const walletId = "0xC77B3dcc92F50d28CBb17821d56f682A9E329C05";
     const privateKey =
-      "0x07f6e3cfa97f1509e6de552df32d5288271c90f3946cdfbb6cb957a80fbf28d2"; // Add your private key
+      "0xde6d1215b75bcf9d4adb5856802d03dcae2fefe7fc90864532779d9182599705"; // Add your private key
 
     // Get transaction details
     const nonce = await web3.eth.getTransactionCount(walletId);
