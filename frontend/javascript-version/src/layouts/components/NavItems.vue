@@ -33,13 +33,6 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
       heading: 'User Interface',
     }"
   />
-  <VerticalNavLink
-    :item="{
-      title: 'Listings',
-      icon: 'bx-credit-card',
-      to: '/cards',
-    }"
-  />
 
   <VerticalNavLink
     :item="{
