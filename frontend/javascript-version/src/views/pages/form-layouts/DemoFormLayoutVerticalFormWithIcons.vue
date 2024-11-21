@@ -1,65 +1,55 @@
 <script setup>
-const firstName = ref('')
-const email = ref('')
-const mobile = ref()
-const password = ref()
-const checkbox = ref(false)
+import { ref } from 'vue';
+
+const amount = ref('');
+const pricePerUnit = ref('');
+const expiry = ref('');
 </script>
 
 <template>
-  <VForm @submit.prevent>
+  <VForm @submit.prevent="handleSubmit">
     <VRow>
+      <!-- Amount Input -->
       <VCol cols="12">
         <VTextField
-          v-model="firstName"
-          prepend-inner-icon="bx-user"
-          label="First Name"
-          placeholder="John"
-        />
-      </VCol>
-
-      <VCol cols="12">
-        <VTextField
-          v-model="email"
-          prepend-inner-icon="bx-envelope"
-          label="Email"
-          type="email"
-          placeholder="johndoe@example.com"
-        />
-      </VCol>
-
-      <VCol cols="12">
-        <VTextField
-          v-model="mobile"
-          prepend-inner-icon="bx-mobile"
-          label="Mobile"
-          placeholder="+1 123 456 7890"
+          v-model="amount"
+          prepend-inner-icon="bx-cube"
+          label="Amount"
+          placeholder="Enter the amount"
           type="number"
+          required
         />
       </VCol>
 
+      <!-- Price Per Unit Input -->
       <VCol cols="12">
         <VTextField
-          v-model="password"
-          prepend-inner-icon="bx-lock"
-          label="Password"
-          autocomplete="on"
-          type="password"
-          placeholder="············"
+          v-model="pricePerUnit"
+          prepend-inner-icon="bx-dollar-circle"
+          label="Price Per Unit"
+          placeholder="Enter price per unit"
+          type="number"
+          required
         />
       </VCol>
 
+      <!-- Expiry Date and Time Input -->
       <VCol cols="12">
-        <VCheckbox
-          v-model="checkbox"
-          label="Remember me"
+        <VTextField
+          v-model="expiry"
+          prepend-inner-icon="bx-calendar"
+          label="Expiry Date and Time"
+          type="datetime-local"
+          required
         />
       </VCol>
 
-      <VCol cols="12">
+      <!-- Submit and Reset Buttons -->
+      <VCol cols="12" class="mt-4">
         <VBtn
           type="submit"
           class="me-2"
+          color="primary"
         >
           Submit
         </VBtn>
@@ -75,3 +65,15 @@ const checkbox = ref(false)
     </VRow>
   </VForm>
 </template>
+
+<script>
+const handleSubmit = () => {
+  console.log('Amount:', amount.value);
+  console.log('Price Per Unit:', pricePerUnit.value);
+  console.log('Expiry:', expiry.value);
+};
+</script>
+
+<style scoped>
+/* Add styles if necessary */
+</style>

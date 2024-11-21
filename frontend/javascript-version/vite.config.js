@@ -9,6 +9,9 @@ import svgLoader from 'vite-svg-loader'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    port: 8000, // Set the port to 3000 (or any port you prefer)
+  },
   plugins: [
     vue(),
     vueJsx(),

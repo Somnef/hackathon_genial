@@ -57,14 +57,14 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   />
   <VerticalNavLink
     :item="{
-      title: 'Sell',
+      title: 'Post Offers / Sell',
       icon: 'bx-layout',
       to: '/form-layouts',
     }"
   />
   <VerticalNavLink
     :item="{
-      title: 'History',
+      title: 'Track Trades',
       icon: 'bx-table',
       to: '/tables',
     }"

@@ -5,7 +5,7 @@ import DemoSimpleTableBasics from '@/views/pages/tables/DemoSimpleTableBasics.vu
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard title="Basic">
+      <VCard title="History of the Transactions">
         <DemoSimpleTableBasics />
       </VCard>
     </VCol>

@@ -55,26 +55,24 @@ const signUp = async (req, res, next) => {
 
     // Call registerUser() on the smart contract
     const callFun = contract.methods.registerUser(walletId); // Pass walletId to the smart contract
-    // const tx = {
-    //   from: walletId,
-    //   to: contractAddress,
-    //   gas: await callFun.estimateGas({ from: walletId }),
-    //   gasPrice: gasPrice,
-    //   data: callFun.encodeABI(),
-    //   nonce: nonce,
-    //   chainId: chainId,
-    // };
+    const tx = {
+      from: walletId,
+      to: contractAddress,
+      gas: await callFun.estimateGas({ from: walletId }),
+      gasPrice: gasPrice,
+      data: callFun.encodeABI(),
+      nonce: nonce,
+      chainId: chainId,
+    };
 
-    // // Sign the transaction
-    // const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
-    // const txCallFunHash = await web3.eth.sendSignedTransaction(
-    //   signedTx.rawTransaction
-    // );
-    // const txCallFunReceipt = await web3.eth.getTransactionReceipt(
-    //   txCallFunHash.transactionHash
-    // );
-
-    // console.log(txCallFunReceipt);
+    // Sign the transaction
+    const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+    const txCallFunHash = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+    const txCallFunReceipt = await web3.eth.getTransactionReceipt(
+      txCallFunHash.transactionHash
+    );
 
     return res.status(201).json({
       message: "User registered successfully.",
@@ -107,7 +105,7 @@ const login = async (req, res) => {
       { id: user._id, walletId: user.walletId },
       JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "48h",
       }
     );
 
@@ -120,7 +118,7 @@ const login = async (req, res) => {
 // Get Me Controller
 const getMe = async (req, res) => {
   try {
-    const userId = req.user._id; // Extracted from JWT middleware
+    const userId = req.user.id; // Extracted from JWT middleware
     const user = await User.findById(userId).select("-password"); // Exclude password
     if (!user) {
       return res.status(404).json({ message: "User not found" });

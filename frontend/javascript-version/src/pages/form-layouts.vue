@@ -12,7 +12,7 @@ import DemoFormLayoutVerticalFormWithIcons from '@/views/pages/form-layouts/Demo
       >
 
         <!-- 👉 Vertical Form with Icons -->
-        <VCard title="Vertical Form with Icons">
+        <VCard title="Post Offer">
           <VCardText>
             <DemoFormLayoutVerticalFormWithIcons />
           </VCardText>

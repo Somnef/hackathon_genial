@@ -1,9 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const router = require("./routers/router"); // Your routes
-const connectDB = require("./utils/db"); // Your database connection utility
+const router = require("./routers/router");
+const connectDB = require("./utils/db");
+const cors = require("cors");
 
 const app = express();
+
+app.use(cors());
 
 // Connect to MongoDB
 connectDB();

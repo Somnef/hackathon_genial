@@ -16,13 +16,14 @@ const router = express.Router();
 
 router.post("/api/user/auth/sign-up", authController.signUp);
 router.post("/api/user/auth/login", authController.login);
-router.get("/api/auth/me", authMiddleware, authController.getMe);
+router.get("/api/user/me", authMiddleware, authController.getMe);
 
 // Offer routes
 
 // contract.methods.offerEnergy
 router.post("/api/offer/create", authMiddleware, offerController.createOffer);
-// router.get("/api/offer/list", offerController.listOffer);
+router.get("/api/offer/list", authMiddleware, offerController.listOffer);
+router.post("/api/offer/end", authMiddleware, offerController.endOffer);
 
 // Auction bid routes
 router.post("/api/auction/bid/create", authMiddleware, bidController.createBid);
