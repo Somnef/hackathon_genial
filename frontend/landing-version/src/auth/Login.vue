@@ -1,6 +1,6 @@
 <template>
   <div class="auth-container">
-    <VaForm ref="form" @submit.prevent="submit" class="login-form">
+    <VaForm ref="form" @submit.prevent="handleSubmit" class="login-form">
       <h1 class="font-semibold text-4xl mb-4">Log in</h1>
       <p class="text-base mb-4 leading-5">
         New to E-Skimo?
@@ -41,11 +41,11 @@
 
       <!-- Submit Button -->
       <button 
-      class="w-full px-6 py-2 bg-blue-800 text-white rounded shadow-md hover:bg-white border-2 border-transparent hover:border-blue-800 hover:text-blue-800 cursor-pointer transition duration-200"
-      @click="navigateToExternalUrl">
-      Login
+        class="w-full px-6 py-2 bg-blue-800 text-white rounded shadow-md hover:bg-white border-2 border-transparent hover:border-blue-800 hover:text-blue-800 cursor-pointer transition duration-200"
+        @click="handleSubmit"
+      >
+        Login
       </button>
-
     </VaForm>
   </div>
 </template>
@@ -53,31 +53,42 @@
 <script lang="ts" setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { useForm, useToast } from 'vuestic-ui'
-import { validators } from '../services/utils'
+import { useToast } from 'vuestic-ui'
+import axios from 'axios'
 
-const { validate } = useForm('form')
-const { push } = useRouter()
-const { init } = useToast()
+const router = useRouter()
+const toast = useToast()
 
 const formData = reactive({
   email: '',
   password: '',
-  keepLoggedIn: false,
 })
 
-const submit = () => {
-  if (validate()) {
-    init({ message: "You've successfully logged in", color: 'success' })
-    push({ name: 'dashboard' })
+const handleSubmit = async () => {
+  try {
+    // Make a POST request to the backend
+    const response = await axios.post('http://localhost:3000/api/user/auth/login', {
+      email: formData.email,
+      password: formData.password,
+    })
+
+    if (response.status === 200) {
+      // Show a success toast message
+      toast.init({ message: "You've successfully logged in", color: 'success' })
+
+      // Redirect to the dashboard
+      //router.push({ name: 'dashboard' })
+      window.location.href = "http://localhost:8000/dashboard"
+    }
+  } catch (error) {
+    // Handle login failure
+    toast.init({
+      message: 'Login failed. Please check your email and password.',
+      color: 'danger',
+    })
+    console.error(error)
   }
 }
-
-const navigateToExternalUrl = () => {
-    // Redirect to a different port or domain
-    window.location.href = 'http://localhost:8000/dashboard'; // This will navigate to the new URL and replace the current page
-  }
-
 </script>
 
 <style scoped>
