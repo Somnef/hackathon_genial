@@ -23,6 +23,7 @@ router.get("/api/user/me", authMiddleware, authController.getMe);
 // contract.methods.offerEnergy
 router.post("/api/offer/create", authMiddleware, offerController.createOffer);
 router.get("/api/offer/list", authMiddleware, offerController.listOffer);
+router.post("/api/offer/end", authMiddleware, offerController.endOffer);
 
 // Auction bid routes
 router.post("/api/auction/bid/create", authMiddleware, bidController.createBid);
