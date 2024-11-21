@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 contract EnergyTrading {
+    address payable owner;
+
     // Basic user data
     mapping(address => bool) public users;
 
@@ -28,7 +30,7 @@ contract EnergyTrading {
     Bid[] public bids;
 
     event UserRegistered(address user);
-    event EnergyOffered(address seller, uint256 energyAmount, uint256 pricePerUnit);
+    event EnergyOffered(uint256 id, address seller, uint256 energyAmount, uint256 pricePerUnit);
     event NewBid(address bidder, uint256 bidAmount);
     event AuctionEnded(address winner, uint256 amount, uint256 energyAmount);
 
@@ -72,34 +74,64 @@ contract EnergyTrading {
             auctionEnded: false
         }));
 
-        emit EnergyOffered(msg.sender, _energyAmount, _pricePerUnit);
+        emit EnergyOffered(energyOffers.length, msg.sender, _energyAmount, _pricePerUnit);
     }
 
     // Place a bid on an energy offer
     function placeBid(uint256 offerId, uint256 _bidAmount) external onlyRegisteredUser payable {
+
+        // Check if the offer exists
+        require(offerId < energyOffers.length, "Offer does not exist.");
+
         EnergyOffer storage offer = energyOffers[offerId];
 
-        // Automatically check if the auction has ended
-        _endAuctionIfExpired(offerId);
+        // Check if the auction has ended
+        require(!offer.auctionEnded, "Auction has ended.");
 
-        require(block.timestamp < offer.auctionEndTime, "Auction has ended.");
-        require(_bidAmount > offer.highestBid, "Bid must be higher than the current highest bid.");
+        // Check if the auction time has not expired
+        require(block.timestamp < offer.auctionEndTime, "Auction time has expired.");
 
-        // Refund previous highest bidder
-        if (offer.highestBidder != address(0)) {
-            payable(offer.highestBidder).transfer(offer.highestBid);
+        // Check if the bid amount is higher than the current highest bid
+        require(_bidAmount > offer.highestBid, "Bid amount must be higher than the current highest bid.");
+
+        // Check if bidder has previously placed a bid and refund the previous bid
+        for (uint256 i = 0; i < bids.length; i++) {
+            if (bids[i].offerId == offerId && bids[i].bidder == msg.sender) {
+
+                // Deduct the amount already in bid from the new bid amount
+                uint256 addedAmount = _bidAmount - bids[i].amount;
+
+                // Check if the added amount exists in the bidder's balance
+                require(msg.sender.balance >= addedAmount, "Insufficient balance.");
+
+                payable(msg.sender).transfer(bids[i].amount);
+                bids[i].amount += addedAmount;
+
+                // Update the highest bid
+                offer.highestBidder = msg.sender;
+                offer.highestBid = _bidAmount;
+
+                emit NewBid(msg.sender, msg.value);
+                return;
+            }
         }
 
-        // Store the new bid
+        // Check if the bid amount exists in the bidder's balance
+        require(msg.sender.balance >= _bidAmount, "Insufficient balance.");
+
+        // Transfer the bid amount to the contract
+        owner.transfer(_bidAmount);
+
+        // Update the highest bid
+        offer.highestBidder = msg.sender;
+        offer.highestBid = _bidAmount;
+
+        // Store the bid
         bids.push(Bid({
             bidder: msg.sender,
             amount: _bidAmount,
             offerId: offerId
         }));
-
-        // Update highest bid
-        offer.highestBidder = msg.sender;
-        offer.highestBid = msg.value;
 
         emit NewBid(msg.sender, msg.value);
     }
@@ -112,8 +144,15 @@ contract EnergyTrading {
             // Mark auction as ended
             offer.auctionEnded = true;
 
-            // Transfer the highest bid to the seller
+            // Transfer the highest  bid from the buyer to the seller
             payable(offer.seller).transfer(offer.highestBid);
+
+            // Refund other bidders
+            for (uint256 i = 0; i < bids.length; i++) {
+                if (bids[i].offerId == offerId && bids[i].bidder != offer.highestBidder) {
+                    payable(bids[i].bidder).transfer(bids[i].amount);
+                }
+            }
 
             // Emit auction end event
             emit AuctionEnded(offer.highestBidder, offer.highestBid, offer.energyAmount);
@@ -132,7 +171,7 @@ contract EnergyTrading {
     }
 
     // Get all active (running) offers
-    function getActiveOffers() external view returns (uint256[] memory) {
+    function getActiveOffers() external view returns (EnergyOffer[] memory) {
         uint256 activeCount = 0;
 
         // Count how many auctions are still active
@@ -143,18 +182,18 @@ contract EnergyTrading {
         }
 
         // Allocate space for active auction IDs
-        uint256[] memory activeOfferIds = new uint256[](activeCount);
+        EnergyOffer[] memory activeOffers = new EnergyOffer[](activeCount);
         uint256 index = 0;
 
         // Store the IDs of active auctions
         for (uint256 i = 0; i < energyOffers.length; i++) {
             if (block.timestamp < energyOffers[i].auctionEndTime && !energyOffers[i].auctionEnded) {
-                activeOfferIds[index] = i;
+                activeOffers[index] = energyOffers[i];
                 index++;
             }
         }
 
-        return activeOfferIds;
+        return activeOffers;
     }
 
     // Get all bids for a specific offer
