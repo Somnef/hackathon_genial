@@ -45,6 +45,9 @@ contract EnergyTrading {
     }
 
     constructor() {
+        // Register the contract creator as owner
+        owner = payable(msg.sender);
+
         // Register the contract creator as a user
         users[msg.sender] = true;
     }
@@ -79,15 +82,16 @@ contract EnergyTrading {
 
     // Place a bid on an energy offer
     function placeBid(uint256 offerId) external onlyRegisteredUser payable {
-        // Automatically end the auction if the time has expired
-        _endAuctionIfExpired(offerId);
-        
         EnergyOffer storage offer = energyOffers[offerId];
+
+        if (block.timestamp >= offer.auctionEndTime) {
+            this.endAuction(offerId);
+            return;
+        }
 
         require(!offer.auctionEnded, "Auction has ended.");
         require(offer.seller != msg.sender, "Seller cannot bid on their own offer.");
 
-        require(block.timestamp < offer.auctionEndTime, "Auction has ended.");
         require(msg.value > offer.highestBid, "Bid must be higher than the current highest bid.");
 
         // Refund the previous highest bidder
@@ -109,38 +113,24 @@ contract EnergyTrading {
         emit NewBid(msg.sender, msg.value);
     }
 
-    // Automatically end the auction if the time has expired
-    function _endAuctionIfExpired(uint256 offerId) private {
-        EnergyOffer storage offer = energyOffers[offerId];
-
-        if (block.timestamp >= offer.auctionEndTime && !offer.auctionEnded) {
-            // Mark auction as ended
-            offer.auctionEnded = true;
-
-            // Transfer the highest  bid from the buyer to the seller
-            payable(offer.seller).transfer(offer.highestBid);
-
-            // Refund other bidders
-            for (uint256 i = 0; i < bids.length; i++) {
-                if (bids[i].offerId == offerId && bids[i].bidder != offer.highestBidder) {
-                    payable(bids[i].bidder).transfer(bids[i].amount);
-                }
-            }
-
-            // Emit auction end event
-            emit AuctionEnded(offer.highestBidder, offer.highestBid, offer.energyAmount);
-        }
-    }
-
     // End the auction and transfer the energy to the highest bidder (for sellers)
     function endAuction(uint256 offerId) external onlySeller(offerId) {
+        require(offerId < energyOffers.length, "Invalid offer ID.");
         EnergyOffer storage offer = energyOffers[offerId];
 
-        // Auction has already been ended automatically or manually
-        require(!offer.auctionEnded, "Auction has not ended yet.");
+        require(!offer.auctionEnded, "Auction has already ended.");
 
-        // Automatically check if auction time has passed and end it
-        _endAuctionIfExpired(offerId);
+        offer.auctionEnded = true;
+
+        // Ensure the contract has enough balance to transfer
+        require(address(this).balance >= offer.highestBid, "Insufficient contract balance.");
+
+        // Transfer the highest bid from the buyer to the seller
+        if (offer.highestBidder != address(0)) {
+            payable(offer.seller).transfer(offer.highestBid);
+        }
+
+        emit AuctionEnded(offer.highestBidder, offer.highestBid, offer.energyAmount);
     }
 
     // Get all active (running) offers
