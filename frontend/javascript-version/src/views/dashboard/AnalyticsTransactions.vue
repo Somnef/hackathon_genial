@@ -1,52 +1,51 @@
 <script setup>
-import chartInfo from '@images/cards/chart-info.png'
-import creditCardSuccess from '@images/cards/credit-card-success.png'
-import creditCardWarning from '@images/cards/credit-card-warning.png'
-import paypalError from '@images/cards/paypal-error.png'
-import walletPrimary from '@images/cards/wallet-primary.png'
+import statsVerticalChart from '@images/cards/chart-success.png'
+import statsVerticalPaypal from '@images/cards/paypal-error.png'
+import statsVerticalWallet from '@images/cards/wallet-primary.png'
+import { ref } from 'vue'
 
 const transactions = [
   {
-    amount: +82.6,
-    paymentMethod: 'PayPal',
-    description: 'Send money',
-    icon: paypalError,
+    amount: +500.25,
+    paymentMethod: 'Solar Energy',
+    description: 'Sell',
+    icon: statsVerticalWallet,
+    color: 'primary',
+  },
+  {
+    paymentMethod: 'Wind Energy',
+    amount: +312.50,
+    description: 'Sell',
+    icon: statsVerticalPaypal,
     color: 'error',
   },
   {
-    paymentMethod: 'Wallet',
-    amount: +270.69,
-    description: 'Mac\'D',
-    icon: walletPrimary,
-    color: 'primary',
-  },
-  {
-    amount: +637.91,
-    paymentMethod: 'Transfer',
-    description: 'Refund',
-    icon: chartInfo,
+    amount: +765.80,
+    paymentMethod: 'Geothermal Energy',
+    description: 'Sell',
+    icon: statsVerticalChart,
     color: 'info',
   },
   {
-    paymentMethod: 'Credit Card',
-    amount: -838.71,
-    description: 'Ordered Food',
-    icon: creditCardSuccess,
+    paymentMethod: 'Hydropower',
+    amount: +420.90,
+    description: 'Sell',
+    icon: statsVerticalChart,
     color: 'success',
   },
   {
-    paymentMethod: 'Wallet',
-    amount: +203.33,
-    description: 'Starbucks',
-    icon: walletPrimary,
+    paymentMethod: 'Solar Energy',
+    amount: -200.50,
+    description: 'Buy',
+    icon: statsVerticalWallet,
     color: 'primary',
   },
   {
-    paymentMethod: 'Mastercard',
-    amount: -92.45,
-    description: 'Ordered Food',
-    icon: creditCardWarning,
-    color: 'warning',
+    paymentMethod: 'Wind Energy',
+    amount: -180.30,
+    description: 'Buy',
+    icon: statsVerticalPaypal,
+    color: 'error',
   },
 ]
 
@@ -67,7 +66,7 @@ const moreList = [
 </script>
 
 <template>
-  <VCard title="Transactions">
+  <VCard title="Latest Transactions">
     <template #append>
       <MoreBtn :menu-list="moreList" />
     </template>

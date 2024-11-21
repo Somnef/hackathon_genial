@@ -89,32 +89,32 @@ const chartOptions = computed(() => {
 
 const orders = [
   {
-    amount: '82.5k',
-    title: 'Electronic',
+    amount: 2500, // 2500 kWh for Electronic category (more energy-consuming)
+    title: 'Solar Panels & Batteries',
     avatarColor: 'primary',
-    subtitle: 'Mobile, Earbuds, TV',
-    avatarIcon: 'bx-mobile-alt',
+    subtitle: 'Solar Panels, Home Batteries, Inverters',
+    avatarIcon: 'bx-sun',
   },
   {
-    amount: '23.8k',
-    title: 'Fashion',
+    amount: 2200, // 2200 kWh for Fashion category
+    title: 'Wind Power',
     avatarColor: 'success',
-    subtitle: 'Tshirt, Jeans, Shoes',
-    avatarIcon: 'bx-closet',
+    subtitle: 'Wind Turbines, Wind Farms',
+    avatarIcon: 'bx-cloud',
   },
   {
-    amount: 849,
-    title: 'Decor',
+    amount: 1499.69, // 1499.69 kWh for Decor category
+    title: 'Hydropower',
     avatarColor: 'info',
-    subtitle: 'Fine Art, Dining',
-    avatarIcon: 'bx-home',
+    subtitle: 'Hydroelectric Plants, Small Dams',
+    avatarIcon: 'bx-water',
   },
   {
-    amount: 99,
-    title: 'Sports',
+    amount: 960, // 960 kWh for Sports category (smaller energy demand)
+    title: 'Geothermal Energy',
     avatarColor: 'secondary',
-    subtitle: 'Football, Cricket Kit',
-    avatarIcon: 'bx-football',
+    subtitle: 'Geothermal Heat Pumps, Hot Springs',
+    avatarIcon: 'bx-capsule',
   },
 ]
 
@@ -136,11 +136,11 @@ const moreList = [
 
 <template>
   <VCard>
-    <VCardItem>
+    <VCardItem class="energy-card">
       <VCardTitle>
-        Order Statistics
+        Daily Energy Statistics
       </VCardTitle>
-      <VCardSubtitle>42.82k Total Sales</VCardSubtitle>
+      <VCardSubtitle>8159.69 kWh transferred </VCardSubtitle>
 
       <template #append>
         <MoreBtn :menu-list="moreList" />
@@ -151,21 +151,11 @@ const moreList = [
       <div class="d-flex align-center justify-space-between mb-6">
         <div class="">
           <h3 class="text-h3 mb-1">
-            8,258
+            147
           </h3>
           <div class="text-caption text-medium-emphasis">
             Total Orders
           </div>
-        </div>
-
-        <div>
-          <VueApexCharts
-            type="donut"
-            :height="120"
-            width="100"
-            :options="chartOptions"
-            :series="series"
-          />
         </div>
       </div>
 
@@ -204,5 +194,12 @@ const moreList = [
 <style lang="scss">
 .card-list {
   --v-card-list-gap: 1.25rem;
+}
+.energy-card {
+  width: 100%;
+  max-width: 500px; /* Limit card width */
+  margin: 16px auto;
+  padding: 16px;
+  height: 110px;
 }
 </style>

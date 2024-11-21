@@ -3,7 +3,6 @@ import AnalyticsCongratulations from '@/views/dashboard/AnalyticsCongratulations
 import AnalyticsFinanceTabs from '@/views/dashboard/AnalyticsFinanceTab.vue'
 import AnalyticsOrderStatistics from '@/views/dashboard/AnalyticsOrderStatistics.vue'
 import AnalyticsProfitReport from '@/views/dashboard/AnalyticsProfitReport.vue'
-import AnalyticsTotalRevenue from '@/views/dashboard/AnalyticsTotalRevenue.vue'
 import AnalyticsTransactions from '@/views/dashboard/AnalyticsTransactions.vue'
 
 // 👉 Images
@@ -33,13 +32,14 @@ import wallet from '@images/cards/wallet-info.png'
           cols="12"
           md="6"
         >
-          <CardStatisticsVertical
+          <CardStatisticsVertical class="analytics-card"
             v-bind="{
-              title: 'Profit',
+              title: 'Sales',
               image: chart,
-              stats: '$12,628',
-              change: 72.80,
+              stats: '$1,389',
+              change: 89.8,
             }"
+            
           />
         </VCol>
 
@@ -48,74 +48,14 @@ import wallet from '@images/cards/wallet-info.png'
           cols="12"
           md="6"
         >
-          <CardStatisticsVertical
+          <CardStatisticsVertical class="analytics-card"
             v-bind="{
-              title: 'Sales',
-              image: wallet,
-              stats: '$4,679',
-              change: 28.42,
-            }"
-          />
-        </VCol>
-      </VRow>
-    </VCol>
-
-    <!-- 👉 Total Revenue -->
-    <VCol
-      cols="12"
-      md="8"
-      order="2"
-      order-md="1"
-    >
-      <AnalyticsTotalRevenue />
-    </VCol>
-
-    <VCol
-      cols="12"
-      sm="8"
-      md="4"
-      order="1"
-      order-md="2"
-    >
-      <VRow>
-        <!-- 👉 Payments -->
-        <VCol
-          cols="12"
-          sm="6"
-        >
-          <CardStatisticsVertical
-            v-bind=" {
               title: 'Payments',
-              image: paypal,
-              stats: '$2,468',
-              change: -14.82,
+              image: wallet,
+              stats: '$642',
+              change: -35.4,
             }"
           />
-        </VCol>
-
-        <!-- 👉 Revenue -->
-        <VCol
-          cols="12"
-          sm="6"
-        >
-          <CardStatisticsVertical
-            v-bind="{
-              title: 'Transactions',
-              image: card,
-              stats: '$14,857',
-              change: 28.14,
-            }"
-          />
-        </VCol>
-      </VRow>
-
-      <VRow>
-        <!-- 👉 Profit Report -->
-        <VCol
-          cols="12"
-          sm="12"
-        >
-          <AnalyticsProfitReport />
         </VCol>
       </VRow>
     </VCol>
@@ -151,3 +91,24 @@ import wallet from '@images/cards/wallet-info.png'
     </VCol>
   </VRow>
 </template>
+
+<style lang="scss" scoped>
+.card {
+  /* Manually define card dimensions */
+  width: 100%; /* Takes full width of its column */
+  max-width: 400px; /* Limits the card width */
+  min-height: 200px; /* Sets a minimum height */
+}
+
+.card-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.analytics-card {
+  width: 100%;
+  height: 210px;
+  padding: 16px; /* Add padding for internal spacing */
+}
+</style>

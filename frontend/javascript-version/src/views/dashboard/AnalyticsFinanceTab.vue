@@ -8,9 +8,9 @@ import { hexToRgb } from '@layouts/utils'
 const vuetifyTheme = useTheme()
 
 const series = {
-  income: [{
+  solar: [{
     data: [
-      24,
+      24, // Solar Energy production (kWh)
       21,
       30,
       22,
@@ -20,9 +20,9 @@ const series = {
       29,
     ],
   }],
-  expenses: [{
+  wind: [{
     data: [
-      24,
+      24, // Wind Energy production (kWh)
       21,
       30,
       25,
@@ -32,9 +32,9 @@ const series = {
       29,
     ],
   }],
-  profit: [{
+  hydro: [{
     data: [
-      24,
+      24, // Hydropower production (kWh)
       21,
       30,
       22,
@@ -44,35 +44,55 @@ const series = {
       35,
     ],
   }],
+  geothermal: [{
+    data: [
+      10, // Geothermal Energy production (kWh)
+      12,
+      14,
+      16,
+      18,
+      22,
+      24,
+      28,
+    ],
+  }],
 }
 
-const currentTab = ref('income')
+const currentTab = ref('solar')
 
 const tabData = computed(() => {
   const data = {
-    income: {
+    solar: {
       avatar: statsVerticalWallet,
-      title: 'Total Income',
-      stats: '$459.1k',
-      profitLoss: 65,
-      profitLossAmount: '6.5',
-      compareToLastWeek: '$39k',
+      title: 'Solar Energy Transfers',
+      stats: '1.2M kWh',
+      efficiency: 65,
+      efficiencyAmount: '7.5%',
+      compareToLastWeek: '5% more than last week',
     },
-    expenses: {
+    wind: {
       avatar: statsVerticalPaypal,
-      title: 'Total Expenses',
-      stats: '$316.5k',
-      profitLoss: 27.8,
-      profitLossAmount: '7.2',
-      compareToLastWeek: '$16k',
+      title: 'Wind Energy Transfers',
+      stats: '950k kWh',
+      efficiency: 80,
+      efficiencyAmount: '10.3%',
+      compareToLastWeek: '12% less than last week',
     },
-    profit: {
+    hydro: {
       avatar: statsVerticalChart,
-      title: 'Total Profit',
-      stats: '$147.9k',
-      profitLoss: 35.1,
-      profitLossAmount: '4.5',
-      compareToLastWeek: '$28k',
+      title: 'Hydropower Transfers',
+      stats: '450k kWh',
+      efficiency: 70,
+      efficiencyAmount: '5.5%',
+      compareToLastWeek: '7% more than last week',
+    },
+    geothermal: {
+      avatar: statsVerticalChart,
+      title: 'Geothermal Energy Transfers',
+      stats: '600k kWh',
+      efficiency: 85,
+      efficiencyAmount: '15.3%',
+      compareToLastWeek: '3% more than last week',
     },
   }
   
@@ -194,14 +214,17 @@ const chartConfig = computed(() => {
         v-model="currentTab"
         class="v-tabs-pill"
       >
-        <VTab value="income">
-          Income
+        <VTab value="solar">
+          Solar Energy
         </VTab>
-        <VTab value="expenses">
-          Expenses
+        <VTab value="wind">
+          Wind Energy
         </VTab>
-        <VTab value="profit">
-          Profit
+        <VTab value="hydro">
+          Hydropower
+        </VTab>
+        <VTab value="geothermal">
+          Geothermal Energy
         </VTab>
       </VTabs>
     </VCardText>
@@ -223,13 +246,13 @@ const chartConfig = computed(() => {
           </h6>
           <span
             class="text-sm"
-            :class="tabData.profitLoss > 0 ? 'text-success' : 'text-error'"
+            :class="tabData.efficiency > 0 ? 'text-success' : 'text-error'"
           >
             <VIcon
               size="24"
               icon="bx-chevron-up"
             />
-            {{ tabData.profitLoss }}%
+            {{ tabData.efficiencyAmount }}
           </span>
         </div>
       </div>
@@ -248,16 +271,16 @@ const chartConfig = computed(() => {
       <VProgressCircular
         size="45"
         color="primary"
-        :model-value="tabData.profitLoss"
+        :model-value="tabData.efficiency"
       >
-        <span class="text-overline text-medium-emphasis">${{ tabData.profitLossAmount }}</span>
+        <span class="text-overline text-medium-emphasis">{{ tabData.efficiency }}%</span>
       </VProgressCircular>
 
       <div>
         <h6 class="text-base font-weight-regular">
           <span class="text-capitalize d-inline-block">{{ currentTab }} this week</span>
         </h6>
-        <span class="text-sm d-inline-block">{{ tabData.compareToLastWeek }} less than last week</span>
+        <span class="text-sm d-inline-block">{{ tabData.compareToLastWeek }}</span>
       </div>
     </VCardText>
   </VCard>

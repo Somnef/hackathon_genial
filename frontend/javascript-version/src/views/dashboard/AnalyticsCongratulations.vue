@@ -5,6 +5,20 @@ import { useTheme } from 'vuetify';
 
 const { global } = useTheme()
 const illustrationJohn = computed(() => global.name.value === 'dark' ? illustrationJohnDark : illustrationJohnLight)
+
+// Example renewable energy data for the user
+const totalEnergyContribution = 1250; // This could be dynamic based on user data (in kWh)
+
+// Calculate the compliment based on the total contribution
+const compliment = computed(() => {
+  if (totalEnergyContribution >= 1000) {
+    return "Amazing work! Your contributions are helping shape a sustainable future!";
+  } else if (totalEnergyContribution >= 500) {
+    return "Great job! You're making a positive impact on the planet.";
+  } else {
+    return "Keep going! Every bit counts towards a better future.";
+  }
+});
 </script>
 
 <template>
@@ -18,20 +32,20 @@ const illustrationJohn = computed(() => global.name.value === 'dark' ? illustrat
       >
         <VCardItem class="pb-3">
           <VCardTitle class="text-primary">
-            Life towards sustainability
+            Your Renewable Energy Contribution
           </VCardTitle>
         </VCardItem>
 
         <VCardText>
-          You have saved the planet, 20% increase from last sales.
-          <br>
+          <span class="font-weight-bold">{{ totalEnergyContribution }} kWh</span> of renewable energy have been contributed to the platform so far.
+          {{ compliment }}
           <br>
           <VBtn
             variant="tonal"
             class="mt-6"
             size="small"
           >
-            Go to Listings
+            Go to Offers
           </VBtn>
         </VCardText>
       </VCol>
