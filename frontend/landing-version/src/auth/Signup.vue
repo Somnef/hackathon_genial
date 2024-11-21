@@ -66,11 +66,9 @@
 <script lang="ts" setup>
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { useToast } from 'vuestic-ui';
 import axios from 'axios';
 
-const router = useRouter();
-const toast = useToast();
+const router = useRouter(); // Vue Router instance
 
 const formData = reactive({
   name: '',
@@ -82,11 +80,7 @@ const formData = reactive({
 const submit = async () => {
   // Validate that passwords match
   if (formData.password !== formData.repeatPassword) {
-    toast.init({
-      message: 'Passwords do not match!',
-      color: 'danger',
-    });
-    return;
+    return; // Exit early if passwords do not match
   }
 
   try {
@@ -98,22 +92,17 @@ const submit = async () => {
     });
 
     if (response.status === 201) { // Assuming backend returns 201 for success
-      toast.init({
-        message: "You've successfully signed up!",
-        color: 'success',
-      });
-      router.push({ name: 'login' }); // Redirect to login page
+      // Redirect to the sign-in page
+      router.push({ name: 'login' }); // Adjust this route name as per your Vue Router configuration
     }
   } catch (error) {
-    // Handle backend errors
-    toast.init({
-      message: error.response?.data?.message || 'Sign-up failed. Please try again.',
-      color: 'danger',
-    });
-    console.error(error);
+    // Log errors to console for debugging
+    console.error('Sign-up error:', error.response?.data?.message || error.message);
   }
 };
 </script>
+
+
 
 <style scoped>
 .auth-container {
