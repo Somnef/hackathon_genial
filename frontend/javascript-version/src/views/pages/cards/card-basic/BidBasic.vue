@@ -135,7 +135,7 @@ function handleBuyClick(index) {
                 <!-- Buy Button -->
                 <VBtn @click="handleBuyClick(index)">
                   <VIcon icon="bx-cart-add" />
-                  <span class="ms-2">Buy</span>
+                  <span class="ms-2">Bid</span>
                 </VBtn>
               </VCardActions>
             </div>

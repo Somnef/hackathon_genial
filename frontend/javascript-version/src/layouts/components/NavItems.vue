@@ -29,13 +29,6 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
       heading: 'User Interface',
     }"
   />
-  <VerticalNavLink
-    :item="{
-      title: 'Listings',
-      icon: 'bx-list-ul', // Relevant icon for Listings
-      to: '/cards',
-    }"
-  />
 
   <VerticalNavLink
     :item="{

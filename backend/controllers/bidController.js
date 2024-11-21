@@ -1,86 +1,183 @@
 const { getContractInstance, web3 } = require("../utils/contractUtil");
 const GlobalError = require("../utils/GlobalError");
-const User = require("../models/User");
+const User = require("../models/User"); // User model for database access
 
-const createBid = async (req, res, next) => {
-    const { offerId, pricePerUnit } = req.body;
+const createOffer = async (req, res, next) => {
+  const { amount, expiry, startingPrice } = req.body;
+  const pricePerUnit = "1";
 
-    try {
-        if (!offerId || !pricePerUnit) {
-            throw new GlobalError("Missing required fields", 400);
-        }
-
-        const userId = req.user.id;
-
-        const user = await User.findById(userId);
-        if (!user || !user.walletId || !user.privateKey) {
-            throw new GlobalError("User wallet or private key not found", 404);
-        }
-
-        const walletId = user.walletId;
-        const privateKey = user.privateKey;
-
-        const contract = getContractInstance();
-
-        const callFun = contract.methods.placeBid(offerId);
-        const gas = await callFun.estimateGas({ 
-            from: walletId
-        });
-        const gasPrice = await web3.eth.getGasPrice();
-        const nonce = await web3.eth.getTransactionCount(walletId, "latest");
-        const chainId = await web3.eth.getChainId();
-
-        const tx = {
-            from: walletId,
-            to: contract.options.address,
-            gas,
-            gasPrice,
-            data: callFun.encodeABI(),
-            value: pricePerUnit,
-            nonce,
-            chainId,
-        };
-
-        const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
-
-        const txReceipt = await web3.eth.sendSignedTransaction(
-            signedTx.rawTransaction
-        );
-
-        res.status(201).json({
-            success: true,
-            message: "Energy bid created successfully",
-            transactionHash: txReceipt.transactionHash,
-        });
+  try {
+    if (!amount || !pricePerUnit || !expiry || !startingPrice) {
+      throw new GlobalError("Missing required fields", 400);
     }
-    catch (error) {
-        // Handle potential revert errors from the blockchain
-        if (error.message.includes('revert')) {
-            return next(new GlobalError("Bid failed. Possible reasons: auction ended, bid too low, or seller attempting to bid.", 400));
-        }
-        console.error("Error creating energy bid:", error);
-        next(error);
+
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user || !user.walletId || !user.privateKey) {
+      throw new GlobalError("User wallet or private key not found", 404);
     }
+
+    const walletId = user.walletId;
+    const privateKey = user.privateKey;
+
+    const contract = getContractInstance();
+
+    const callFun = contract.methods.offerEnergy(
+      amount,
+      pricePerUnit,
+      expiry,
+      startingPrice
+    );
+    const gas = await callFun.estimateGas({ from: walletId });
+    const gasPrice = await web3.eth.getGasPrice();
+    const nonce = await web3.eth.getTransactionCount(walletId, "latest");
+    const chainId = await web3.eth.getChainId();
+
+    const tx = {
+      from: walletId,
+      to: contract.options.address,
+      gas,
+      gasPrice,
+      data: callFun.encodeABI(),
+      nonce,
+      chainId,
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+
+    const txHash = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+
+    const receipt = await web3.eth.getTransactionReceipt(
+      txHash.transactionHash
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Energy offer created successfully",
+      transactionHash: receipt.transactionHash,
+    });
+  } catch (error) {
+    console.error("Error creating energy offer:", error);
+    next(error);
+  }
 };
 
-const listBids = async (req, res, next) => {
-    try {
-        const contract = getContractInstance();
-        const { offerId } = req.params;
+const listOffer = async (req, res, next) => {
+  try {
+    const contract = getContractInstance();
 
-        const bids = await contract.methods.getBidsByOffer(offerId).call();
-        res.status(200).json({
-            success: true,
-            message: "Bids retrieved successfully",
-            bids,
-        });
-    } catch (error) {
-        console.error("Error listing bids:", error);
-        next(error);
+    const offers = await contract.methods.getActiveOffers().call();
+
+    res.status(200).json({
+      success: true,
+      offers: offers.map((offer) => ({
+        offerId: offer.id.toString(),
+        seller: offer.seller,
+        amount: offer.energyAmount.toString(),
+        pricePerUnit: offer.pricePerUnit.toString(),
+        expiry: offer.auctionEndTime.toString(),
+        status: offer.auctionEnded,
+        highestBid: offer.highestBid.toString(),
+      })),
+    });
+  } catch (error) {
+    console.error("Error listing offers:", error);
+    next(error);
+  }
+};
+
+const endOffer = async (req, res, next) => {
+  const { offerId } = req.body;
+
+  try {
+    if (!offerId) {
+      throw new GlobalError("Missing required field: offerId", 400);
     }
+
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user || !user.walletId || !user.privateKey) {
+      throw new GlobalError("User wallet or private key not found", 404);
+    }
+
+    const walletId = user.walletId;
+    const privateKey = user.privateKey;
+
+    const contract = getContractInstance();
+
+    const callFun = contract.methods.endAuction(offerId);
+    const gas = await callFun.estimateGas({ from: walletId });
+    const gasPrice = await web3.eth.getGasPrice();
+    const nonce = await web3.eth.getTransactionCount(walletId, "latest");
+    const chainId = await web3.eth.getChainId();
+
+    const tx = {
+      from: walletId,
+      to: contract.options.address,
+      gas,
+      gasPrice,
+      data: callFun.encodeABI(),
+      nonce,
+      chainId,
+    };
+
+    const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+
+    const txHash = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
+
+    const receipt = await web3.eth.getTransactionReceipt(
+      txHash.transactionHash
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Offer ended successfully",
+      transactionHash: receipt.transactionHash,
+    });
+  } catch (error) {
+    console.error("Error ending offer:", error);
+    next(error);
+  }
 };
 
-module.exports = {
-    createBid,
-    listBids,
+const getOffersByUser = async (req, res, next) => {
+  try {
+    const contract = getContractInstance();
+
+    const { walletId } = req.user;
+
+    if (!walletId) {
+      return res.status(400).json({ message: "Invalid or missing wallet ID." });
+    }
+
+    const offers = await contract.methods.getActiveOffers().call();
+
+    const userOffers = offers.filter(
+      (offer) => offer.seller.toLowerCase() === walletId.toLowerCase()
+    );
+
+    res.status(200).json({
+      success: true,
+      offers: userOffers.map((offer) => ({
+        offerId: offer.id.toString(),
+        seller: offer.seller,
+        amount: offer.energyAmount.toString(),
+        pricePerUnit: offer.pricePerUnit.toString(),
+        expiry: offer.auctionEndTime.toString(),
+        status: offer.auctionEnded,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching user's offers:", error);
+    next(error);
+  }
 };
+
+module.exports = { createOffer, listOffer, endOffer, getOffersByUser };
+
