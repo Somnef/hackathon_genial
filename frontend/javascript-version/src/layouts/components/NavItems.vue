@@ -11,21 +11,17 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
       title: 'Dashboards',
       badgeContent: '5',
       badgeClass: 'bg-error',
-      icon: 'bx-home-smile',
+      icon: 'bx-home',
     }"
   >
     <VerticalNavLink
       :item="{
         title: 'Analytics',
         to: '/dashboard',
+        icon: 'bx-bar-chart', // Relevant icon for Analytics
       }"
     />
-  
   </VerticalNavGroup>
-
-
-
-
 
   <!-- 👉 User Interface -->
   <VerticalNavSectionTitle
@@ -36,7 +32,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   <VerticalNavLink
     :item="{
       title: 'Listings',
-      icon: 'bx-credit-card',
+      icon: 'bx-list-ul', // Relevant icon for Listings
       to: '/cards',
     }"
   />
@@ -44,8 +40,16 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   <VerticalNavLink
     :item="{
       title: 'Biddings',
-      icon: 'bx-credit-card',
+      icon: 'bx-dollar', // Relevant icon for Biddings
       to: '/bids',
+    }"
+  />
+
+  <VerticalNavLink
+    :item="{
+      title: 'My Offers',
+      icon: 'bx-gift', // Relevant icon for My Offers
+      to: '/myoffers',
     }"
   />
 
@@ -58,14 +62,15 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   <VerticalNavLink
     :item="{
       title: 'Post Offers / Sell',
-      icon: 'bx-layout',
+      icon: 'bx-upload', // Relevant icon for Post Offers / Sell
       to: '/form-layouts',
     }"
   />
+  
   <VerticalNavLink
     :item="{
       title: 'Track Trades',
-      icon: 'bx-table',
+      icon: 'bx-line-chart', // Relevant icon for Track Trades
       to: '/tables',
     }"
   />

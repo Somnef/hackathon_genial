@@ -36,6 +36,10 @@ export const routes = [
         path: 'bids',
         component: () => import('@/pages/bids.vue'),
       },
+      {
+        path: 'myoffers',
+        component: () => import('@/pages/myoffers.vue'),
+      },
     ],
   },
   {
